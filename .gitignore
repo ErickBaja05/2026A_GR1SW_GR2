@@ -67,3 +67,28 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# Carpetas de Visual Studio
+**/.vs/
+**/*.user
+**/*.userosscache
+**/*.sln.docstates
+
+# Carpetas de compilación (¡ESTO NUNCA SE SUBE!)
+**/x64/
+**/x86/
+**/Debug/
+**/Release/
+**/[Bb]in/
+**/[Oo]bj/
+
+# Archivos compilados
+*.exe
+*.dll
+*.obj
+*.pdb
+*.ilk
+*.idb
+
+# Excepción para el DLL de dependencias que sí queremos que se suba OBLIGATORIAMENTE
+!Simulador/Dependencies/bin/*.dll
