@@ -15,4 +15,7 @@ public:
     bool shouldClose();
     void swapBuffers();
     void processInput();
+
+    // AGREGAR ESTA LÍNEA: Nos permite acceder a la ventana para la cámara
+    GLFWwindow* getGLFWWindow() { return window; }
 };

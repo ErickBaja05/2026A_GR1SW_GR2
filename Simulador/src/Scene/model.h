@@ -5,14 +5,12 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <learnopengl/stb_image.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
-
 #include "../Graphics/mesh.h"
 #include "../Graphics/shader.h"
+#include <stb_image.h>
 
 #include <string>
 #include <fstream>
@@ -213,6 +211,9 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
     glGenTextures(1, &textureID);
 
     int width, height, nrComponents;
+
+    // Sincroniza la lectura de la imagen con el giro de Assimp
+    stbi_set_flip_vertically_on_load(true);
     unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
     if (data)
     {
