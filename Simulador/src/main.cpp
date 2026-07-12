@@ -1,5 +1,9 @@
 #define STB_IMAGE_IMPLEMENTATION /
 #include "Engine/Window.h"
+#include "Engine/InputManager.h"
+#include "Engine/CollisionManager.h"
+#include "Engine/GameLogic.h"
+
 #include "Graphics/shader.h" 
 #include "Scene/model.h"
 #include "Scene/camera.h"
@@ -8,25 +12,22 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// --- VARIABLES GLOBALES PARA LA CÁMARA ---
-// (Requisito de GLFW por ser C-API. Josue lo abstraerá luego)
-Camera camera(glm::vec3(0.0f, 0.0f, 5.0f)); // Iniciamos 5 metros hacia atrás[cite: 10, 12]
-float lastX = 800.0f / 2.0f;
-float lastY = 600.0f / 2.0f;
-bool firstMouse = true;
+// Declaración
+Camera camera(glm::vec3(0.0f, 0.0f, 5.0f)); 
+InputManager inputManager(&camera);
 
 // Variables para independizar el movimiento de los FPS (Frames Per Second)[cite: 13]
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-// Declaración de las funciones Callback[cite: 13]
+// Declaración de las funciones Callback
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInputCamera(GLFWwindow* window);
 
 int main() {
     // 1. Inicializamos nuestra clase Window
     Window gameWindow(800, 600, "Simulador - Cargando Modelo y Camara");
+    
 
     // 2. Configuramos los Callbacks del ratón directo en la ventana de GLFW[cite: 13]
     GLFWwindow* rawWindow = gameWindow.getGLFWWindow();
@@ -43,7 +44,7 @@ int main() {
     Shader myShader("Assets/shaders/model.vs", "Assets/shaders/model.fs");
     Model myModel("Assets/models/backpack/backpack.obj");
 
-    glEnable(GL_DEPTH_TEST); //
+    glEnable(GL_DEPTH_TEST);
 
     // 4. El Game Loop
     while (!gameWindow.shouldClose()) {
@@ -53,7 +54,7 @@ int main() {
         lastFrame = currentFrame;
 
         // Fase de Input
-        processInputCamera(rawWindow); // Teclado[cite: 13]
+        inputManager.processInput(rawWindow, deltaTime);
 
         // Limpieza de pantalla (Gris oscuro)
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -80,51 +81,19 @@ int main() {
         // ¡Dibujamos!
         myModel.Draw(myShader);
 
-            // Fase de refresco de pantalla
+        // Fase de refresco de pantalla
         gameWindow.swapBuffers();
     }
 
     return 0;
 }
 
-// --- IMPLEMENTACIÓN DE LOS CALLBACKS DE LA CÁMARA ---
-
-// Procesa el teclado en cada frame[cite: 13]
-void processInputCamera(GLFWwindow* window) {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(FORWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    inputManager.mouse_callback(window, xpos, ypos);
 }
 
-// Procesa el movimiento del ratón para mirar alrededor[cite: 13]
-void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
-    float xpos = static_cast<float>(xposIn);
-    float ypos = static_cast<float>(yposIn);
-
-    if (firstMouse) {
-        lastX = xpos;
-        lastY = ypos;
-        firstMouse = false;
-    }
-
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // Invertido porque las coordenadas Y van de abajo hacia arriba
-
-    lastX = xpos;
-    lastY = ypos;
-
-    camera.ProcessMouseMovement(xoffset, yoffset);
-}
-
-// Procesa la rueda del ratón para el Zoom[cite: 13]
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    camera.ProcessMouseScroll(static_cast<float>(yoffset));
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    inputManager.scroll_callback(window, xoffset, yoffset);
 }

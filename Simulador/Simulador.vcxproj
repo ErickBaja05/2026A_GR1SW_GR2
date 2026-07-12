@@ -163,11 +163,17 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Engine\CollisionManager.cpp" />
+    <ClCompile Include="src\Engine\GameLogic.cpp" />
     <ClCompile Include="src\Engine\glad.c" />
+    <ClCompile Include="src\Engine\InputManager.cpp" />
     <ClCompile Include="src\Engine\Window.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Engine\CollisionManager.h" />
+    <ClInclude Include="src\Engine\GameLogic.h" />
+    <ClInclude Include="src\Engine\InputManager.h" />
     <ClInclude Include="src\Engine\Window.h" />
     <ClInclude Include="src\Graphics\mesh.h" />
     <ClInclude Include="src\Graphics\shader.h" />
