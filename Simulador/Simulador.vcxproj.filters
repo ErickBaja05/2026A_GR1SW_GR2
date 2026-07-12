@@ -49,5 +49,11 @@
     <None Include="Assets\shaders\triangle.fs">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="Assets\shaders\model.vs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\shaders\model.fs">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -175,6 +175,8 @@
     <ClInclude Include="src\Scene\model.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\shaders\model.fs" />
+    <None Include="Assets\shaders\model.vs" />
     <None Include="Assets\shaders\triangle.fs" />
     <None Include="Assets\shaders\triangle.vs" />
   </ItemGroup>
