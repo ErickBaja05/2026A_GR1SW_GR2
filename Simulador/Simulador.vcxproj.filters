@@ -24,13 +24,7 @@
     <ClCompile Include="src\Engine\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine\GameLogic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Engine\InputManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Engine\CollisionManager.cpp">
+    <ClCompile Include="src\Engine\SceneManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -50,13 +44,10 @@
     <ClInclude Include="src\Engine\Window.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\CollisionManager.h">
+    <ClInclude Include="src\Engine\SceneManager.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\GameLogic.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Engine\InputManager.h">
+    <ClInclude Include="src\Engine\SceneNode.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -71,6 +62,12 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="Assets\shaders\model.fs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\shaders\skybox.vs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="Assets\shaders\skybox.fs">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

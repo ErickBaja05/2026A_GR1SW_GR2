@@ -2,6 +2,7 @@
 #include <iostream>
 // Asegúrate de que stb_image se incluye aquí si la función loadCubemap lo usa
 #include <stb_image.h> 
+#include "../Lighting/LightManager.h"
 
 SceneManager::SceneManager(Shader* main, Shader* sky, LightManager* lm) {
     mainShader = main;
