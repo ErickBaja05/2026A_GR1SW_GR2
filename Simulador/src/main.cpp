@@ -28,7 +28,7 @@ int main() {
     // NOTA PARA JOSUE: Tienes que actualizar tu constructor para aceptar sm y lm
     InputManager inputManager(&camera, &sceneManager, &lightManager);
 
-    // Configuramos los Callbacks de la ventana (Redirigidos al InputManager de Josue)[cite: 4, 5]
+    // Configuramos los Callbacks de la ventana (Redirigidos al InputManager de Josue)
     GLFWwindow* rawWindow = gameWindow.getGLFWWindow();
     glfwSetWindowUserPointer(rawWindow, &inputManager);
 

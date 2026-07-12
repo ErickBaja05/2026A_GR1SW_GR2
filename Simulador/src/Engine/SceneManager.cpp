@@ -24,9 +24,8 @@ void SceneManager::loadNeighborhood() {
     houseProps.clear();
 
     // Aquí agregas todos los .obj de afuera
-    //neighborhoodProps.push_back(new Model("Assets/models/vecindario/ciudad.obj"));
-    // neighborhoodProps.push_back(new Model("Assets/models/vecindario/arbol1.obj"));
-
+    neighborhoodProps.push_back(new Model("Assets/models/Barrio/barrio.obj"));
+   
     // Configuramos luz de día
     lightManager->setDirectionalLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(1.0f));
 
@@ -39,12 +38,19 @@ void SceneManager::loadHouse() {
     neighborhoodProps.clear();
 
     // 1. Cargas la estructura principal (Paredes, piso, techo)
-    houseProps.push_back(new Model("Assets/models/casa/casa.obj"));
+    houseProps.push_back(new Model("Assets/models/Casa/casa.obj"));
 
     // 2. Cargas los objetos interactivos o separados que mandó Anderson
-    //houseProps.push_back(new Model("Assets/models/refrigerator/refrigerator.obj"));
-    //houseProps.push_back(new Model("Assets/models/bed/bed.obj"));
-    //houseProps.push_back(new Model("Assets/models/kitchen/kitchen.obj"));
+    houseProps.push_back(new Model("Assets/models/Bed/bed.obj"));
+    houseProps.push_back(new Model("Assets/models/Cupboard/cupboard.obj"));
+    houseProps.push_back(new Model("Assets/models/Desk/desk.obj"));
+    houseProps.push_back(new Model("Assets/models/Kitchen/kitchen.obj"));
+    houseProps.push_back(new Model("Assets/models/Refrigerator/refrigerator.obj"));
+    houseProps.push_back(new Model("Assets/models/Shower/shower.obj"));
+    houseProps.push_back(new Model("Assets/models/Table/table.obj"));
+    houseProps.push_back(new Model("Assets/models/Toiled/toiled.obj"));
+    houseProps.push_back(new Model("Assets/models/Washbasin/washbasin.obj"));
+
 
     setupHouseLights();
 
@@ -138,7 +144,7 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection) {
     mainShader->setMat4("projection", projection);
     mainShader->setMat4("view", view);
 
-    // Jorge envía la información de las luces al shader de los objetos[cite: 6]
+    // Jorge envía la información de las luces al shader de los objetos
     lightManager->sendLightsToShader(*mainShader);
 
         glm::mat4 modelMatrix = glm::mat4(1.0f);
