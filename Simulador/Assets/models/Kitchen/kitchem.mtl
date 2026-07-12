@@ -1,0 +1,152 @@
+# Blender 5.1.2 MTL File: 'escena_proyecto.blend'
+# www.blender.org
+
+newmtl Basement_mat
+Ns 32.000008
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Basement_mat_baseColor.jpeg
+
+newmtl Burner_mat
+Ns 31.466654
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Burner_mat_baseColor.jpeg
+
+newmtl Cooktop_mat
+Ns 36.799999
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Cooktop_mat_baseColor.jpeg
+
+newmtl Cupboard_Big_mat
+Ns 32.000008
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Cupboard_Big_mat_baseColor.jpeg
+
+newmtl Cupboard_Upper_01_mat
+Ns 32.000008
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Cupboard_Upper_01_mat_baseColor.jpeg
+
+newmtl Cupboard_Upper_02_mat
+Ns 32.000008
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Cupboard_Upper_02_mat_baseColor.jpeg
+
+newmtl Drawer_mat
+Ns 32.000008
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Drawer_mat_baseColor.jpeg
+
+newmtl Gas_cock_mat
+Ns 35.733330
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Gas_cock_mat_baseColor.jpeg
+
+newmtl Grid_mat
+Ns 32.000008
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Grid_mat_baseColor.jpeg
+
+newmtl Handle_mat
+Ns 49.066677
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Handle_mat_baseColor.jpeg
+
+newmtl Oven_mat
+Ns 41.785133
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Oven_mat_baseColor.jpeg
+
+newmtl Sink_mat
+Ns 39.466679
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Sink_mat_baseColor.jpeg
+
+newmtl Syphon_mat
+Ns 49.066677
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Syphon_mat_baseColor.jpeg
+
+newmtl Table_mat
+Ns 48.000004
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Table_mat_baseColor.jpeg
+
+newmtl Tap_mat
+Ns 32.000008
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Tap_mat_baseColor.jpeg
