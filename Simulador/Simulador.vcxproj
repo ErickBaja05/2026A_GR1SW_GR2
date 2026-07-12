@@ -166,6 +166,7 @@
     <ClCompile Include="src\Engine\glad.c" />
     <ClCompile Include="src\Engine\SceneManager.cpp" />
     <ClCompile Include="src\Engine\Window.cpp" />
+    <ClCompile Include="src\Lighting\LightManager.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
