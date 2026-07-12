@@ -1,0 +1,45 @@
+# Blender 5.1.2 MTL File: 'escena_proyecto.blend'
+# www.blender.org
+
+newmtl bottom
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd bottom_baseColor.jpeg
+
+newmtl m_glass_door
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 2
+map_Kd m_glass_door_baseColor.png
+map_d m_glass_door_baseColor.png
+map_Bump -bm 1.000000 m_glass_door_normal.png
+
+newmtl m_shower
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd m_shower_baseColor.jpeg
+map_Bump -bm 1.000000 m_shower_normal.png
+
+newmtl m_walls_frame_handle_drain
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd m_walls_frame_handle_drain_baseColor.jpeg
+map_Bump -bm 1.000000 m_walls_frame_handle_drain_normal.png

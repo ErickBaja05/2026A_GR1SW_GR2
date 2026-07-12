@@ -164,10 +164,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine\glad.c" />
+    <ClCompile Include="src\Engine\SceneManager.cpp" />
     <ClCompile Include="src\Engine\Window.cpp" />
+    <ClCompile Include="src\Lighting\LightManager.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Engine\SceneManager.h" />
+    <ClInclude Include="src\Engine\SceneNode.h" />
     <ClInclude Include="src\Engine\Window.h" />
     <ClInclude Include="src\Graphics\mesh.h" />
     <ClInclude Include="src\Graphics\shader.h" />
@@ -177,6 +181,8 @@
   <ItemGroup>
     <None Include="Assets\shaders\model.fs" />
     <None Include="Assets\shaders\model.vs" />
+    <None Include="Assets\shaders\skybox.fs" />
+    <None Include="Assets\shaders\skybox.vs" />
     <None Include="Assets\shaders\triangle.fs" />
     <None Include="Assets\shaders\triangle.vs" />
   </ItemGroup>
