@@ -1,0 +1,57 @@
+# Blender 5.1.2 MTL File: 'escena_proyecto.blend'
+# www.blender.org
+
+newmtl Blanket
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Blanket_baseColor.jpeg
+map_Bump -bm 1.000000 Blanket_normal.png
+
+newmtl Blue_Wood
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Blue_Wood_baseColor.jpeg
+map_Bump -bm 1.000000 Blue_Wood_normal.png
+
+newmtl Brown_Wood
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Brown_Wood_baseColor.jpeg
+map_Bump -bm 1.000000 Brown_Wood_normal.png
+
+newmtl Matress
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Matress_baseColor.jpeg
+map_Bump -bm 1.000000 Matress_normal.png
+
+newmtl Pillow
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd Pillow_baseColor.jpeg
+map_Bump -bm 1.000000 Pillow_normal.png

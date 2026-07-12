@@ -1,0 +1,23 @@
+# Blender 5.1.2 MTL File: 'escena_proyecto.blend'
+# www.blender.org
+
+newmtl Vetri
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1000.000000
+d 1.000000
+illum 2
+map_Kd Vetri_diffuse.jpeg
+map_Ns Vetri_specularGlossiness.png
+map_Bump -bm 1.000000 Vetri_normal.png
+
+newmtl Vetro
+Ka 1.000000 1.000000 1.000000
+Kd 0.107418 0.221389 0.352606
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1000.000000
+d 0.100000
+illum 9
+map_Ns Vetro_specularGlossiness.png
