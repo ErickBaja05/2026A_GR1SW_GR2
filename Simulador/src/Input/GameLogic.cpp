@@ -19,6 +19,7 @@ GameLogic::GameLogic(CollisionManager* collisionManager, InputManager* inputMana
     this->sceneManager = sceneManager;
     this->lightManager = lightManager;
     this->camera = camera;
+    this->interactionKey = GLFW_KEY_E;
 }
 
 
@@ -35,18 +36,19 @@ void GameLogic::update()
 
     // Consultar al CollisionManager si el jugador está pisando algún Trigger activo
     const Trigger* activeTrigger = collisionManager->checkCollision(playerPosition);
-
     // Si no hay colisión con ningún trigger, terminamos el flujo de este frame
-    if (activeTrigger == nullptr)
-    {
-        return;
-    }
+    //if (activeTrigger == nullptr)
+    //{
+    //    return;
+    //}
 
     // 5. Si hay un trigger activo, verificamos si el jugador presionó la tecla de interacción
     if (inputManager->isKeyPressed(interactionKey))
     {
         // Si se presionó la tecla, procesamos la lógica de interacción de forma segmentada
-        processInteraction(activeTrigger);
+        //processInteraction(activeTrigger);
+        std::cout << "Se precionó la tecla E\nLlamando a loadHouse\n";
+        sceneManager->loadHouse();
     }
 }
 
