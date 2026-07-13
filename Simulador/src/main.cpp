@@ -3,7 +3,7 @@
 #include "Engine/SceneManager.h"
 #include "Graphics/LightManager.h" 
 #include "Scene/camera.h"
-#include "Engine/InputManager.h" 
+#include "Input/InputManager.h" 
 
 Camera camera(glm::vec3(0.0f, 2.0f, 5.0f)); // Iniciamos un poco más arriba para simular la altura de los ojos
 float deltaTime = 0.0f;
