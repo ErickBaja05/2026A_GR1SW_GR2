@@ -171,6 +171,7 @@
     <ClCompile Include="src\Input\InputManager.cpp" />
     <ClCompile Include="src\Lighting\LightManager.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Scene\model.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Engine\SceneManager.h" />

@@ -12,7 +12,7 @@ class InputManager {
 public:
     // Ahora recibe los tres componentes vitales
    
-    InputManager(Camera* camera, SceneManager* sceneManager, LightManager* lightManager);
+    InputManager(Camera* camera);
     void mouse_callback(GLFWwindow* window, double xpos, double ypos);
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
     void processInput(GLFWwindow* window, double deltaTime);
