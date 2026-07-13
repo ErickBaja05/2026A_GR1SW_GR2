@@ -1,7 +1,7 @@
 #pragma once
 #include "../Scene/model.h"
 #include "../Graphics/shader.h"
-#include "../Graphics/LightManager.h"
+#include "../Lighting/LightManager.h"
 
 #include <glm/glm.hpp>
 #include <string>

@@ -16,12 +16,12 @@ public:
     void mouse_callback(GLFWwindow* window, double xpos, double ypos);
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
     void processInput(GLFWwindow* window, double deltaTime);
+    bool isKeyPressed(int key) const;
 
 private:
     Camera* camera;
-    SceneManager* sceneManager;
-    LightManager* lightManager;
-    
+    GLFWwindow* window;
+
     bool firstMouse;
     float lastX;
     float lastY;

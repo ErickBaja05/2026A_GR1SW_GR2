@@ -1,4 +1,4 @@
-#include "../Graphics/LightManager.h"
+#include "../Lighting/LightManager.h"
 
 void LightManager::setDirectionalLight(glm::vec3 dir, glm::vec3 color) {
     directionalLightDir = dir;
