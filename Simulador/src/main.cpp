@@ -1,7 +1,7 @@
 #define STB_IMAGE_IMPLEMENTATION 
 #include "Engine/Window.h"
 #include "Engine/SceneManager.h"
-#include "Graphics/LightManager.h" 
+#include "Lighting/LightManager.h" 
 #include "Scene/camera.h"
 
 // JOSUE: Tu clase ahora debe incluir esto en su .h
