@@ -3,8 +3,6 @@
 #include "Engine/SceneManager.h"
 #include "Lighting/LightManager.h" 
 #include "Scene/camera.h"
-
-// JOSUE: Tu clase ahora debe incluir esto en su .h
 #include "Input/InputManager.h" 
 
 Camera camera(glm::vec3(0.0f, 2.0f, 5.0f)); // Iniciamos un poco más arriba para simular la altura de los ojos
@@ -28,7 +26,7 @@ int main() {
     // NOTA PARA JOSUE: Tienes que actualizar tu constructor para aceptar sm y lm
     InputManager inputManager(&camera, &sceneManager, &lightManager);
 
-    // Configuramos los Callbacks de la ventana (Redirigidos al InputManager de Josue)[cite: 4, 5]
+    // Configuramos los Callbacks de la ventana (Redirigidos al InputManager de Josue)
     GLFWwindow* rawWindow = gameWindow.getGLFWWindow();
     glfwSetWindowUserPointer(rawWindow, &inputManager);
 
