@@ -43,13 +43,18 @@ void GameLogic::update()
     //}
 
     // 5. Si hay un trigger activo, verificamos si el jugador presionó la tecla de interacción
-    if (inputManager->isKeyPressed(interactionKey))
+
+    bool isPressed = inputManager->isKeyPressed(interactionKey);
+    if (isPressed && !wasInteractionKeyPressed)
     {
         // Si se presionó la tecla, procesamos la lógica de interacción de forma segmentada
         //processInteraction(activeTrigger);
-        std::cout << "Se precionó la tecla E\nLlamando a loadHouse\n";
-        sceneManager->loadHouse();
+        std::cout << "Tecla E presionada (Una sola vez)\n";
+        if (sceneManager) {
+            sceneManager->toggleScene(); // Usamos la nueva función maestra
+        }
     }
+    wasInteractionKeyPressed = isPressed;
 }
 
 void GameLogic::processInteraction(const Trigger* trigger)
