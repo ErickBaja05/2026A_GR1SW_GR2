@@ -166,6 +166,9 @@
     <ClCompile Include="src\Engine\glad.c" />
     <ClCompile Include="src\Engine\SceneManager.cpp" />
     <ClCompile Include="src\Engine\Window.cpp" />
+    <ClCompile Include="src\Input\CollisionManager.cpp" />
+    <ClCompile Include="src\Input\GameLogic.cpp" />
+    <ClCompile Include="src\Input\InputManager.cpp" />
     <ClCompile Include="src\Lighting\LightManager.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
@@ -175,6 +178,10 @@
     <ClInclude Include="src\Engine\Window.h" />
     <ClInclude Include="src\Graphics\mesh.h" />
     <ClInclude Include="src\Graphics\shader.h" />
+    <ClInclude Include="src\Input\CollisionManager.h" />
+    <ClInclude Include="src\Input\GameLogic.h" />
+    <ClInclude Include="src\Input\InputManager.h" />
+    <ClInclude Include="src\Lighting\LightManager.h" />
     <ClInclude Include="src\Scene\camera.h" />
     <ClInclude Include="src\Scene\model.h" />
   </ItemGroup>
