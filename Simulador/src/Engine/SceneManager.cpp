@@ -1,89 +1,68 @@
 #include "SceneManager.h"
 #include <iostream>
-#include <stb_image.h> 
-#include "../Lighting/LightManager.h"
 
-SceneManager::SceneManager(Shader* main, Shader* sky, LightManager* lm, Camera* cam) {
+SceneManager::SceneManager(Shader* main, LightManager* lm, Camera* cam) {
     mainShader = main;
-    skyboxShader = sky;
     lightManager = lm;
     camera = cam;
-    currentState = SceneState::NEIGHBORHOOD;
 
-    setupSkybox(); // Inicializamos el cubo gigante de fondo
+    // Al instanciar, cargamos directamente la casa
+    loadHouse();
 }
 
 SceneManager::~SceneManager() {
-    for (Model* prop : neighborhoodProps) delete prop;
-    for (Model* prop : houseProps) delete prop;
-}
-
-// Nueva función de control
-void SceneManager::toggleScene() {
-    if (currentState == SceneState::NEIGHBORHOOD) {
-        loadHouse();
-    }
-    else {
-        loadNeighborhood();
-    }
-}
-
-void SceneManager::loadNeighborhood() {
-    std::cout << "[SceneManager] Cargando Vecindario..." << std::endl;
-    for (Model* prop : houseProps) delete prop;
-    houseProps.clear();
-
-    neighborhoodProps.push_back(new Model("Assets/models/Barrio/barrio.obj"));
-    lightManager->setDirectionalLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(1.0f));
-
-    // Te teletransportamos a la calle (Libre movimiento)
-    //if (camera) camera->Position = glm::vec3(0.0f, 2.0f, 1.0f);
-
-    currentState = SceneState::NEIGHBORHOOD;
+    for (Model* prop : sceneProps) delete prop;
+    sceneProps.clear();
 }
 
 void SceneManager::loadHouse() {
-    std::cout << "[SceneManager] Entrando a la casa..." << std::endl;
+    std::cout << "[SceneManager] Cargando Escena Principal (Casa y Objetos)..." << std::endl;
 
-    for (Model* prop : neighborhoodProps) delete prop;
-    neighborhoodProps.clear();
-    for (Model* prop : houseProps) delete prop;
-    houseProps.clear();
+    for (Model* prop : sceneProps) delete prop;
+    sceneProps.clear();
 
-    houseProps.push_back(new Model("Assets/models/Casa/casa.obj"));
-    houseProps.push_back(new Model("Assets/models/Bed/bed.obj"));
-    houseProps.push_back(new Model("Assets/models/Cupboard/cupboard.obj"));
-    houseProps.push_back(new Model("Assets/models/Desk/desk.obj"));
-    houseProps.push_back(new Model("Assets/models/P_Bathroom/p_bathroom.obj"));
-    houseProps.push_back(new Model("Assets/models/P_Bedroom/p_bedroom.obj"));
-    houseProps.push_back(new Model("Assets/models/P_Cocina/p_cocina.obj"));
-    houseProps.push_back(new Model("Assets/models/P_CV1_p1/pcv1_p1.obj"));
-    houseProps.push_back(new Model("Assets/models/P_CV1_p2/pcv1_p2.obj"));
-    houseProps.push_back(new Model("Assets/models/P_CV2_p1/pcv2_p1.obj"));
-    houseProps.push_back(new Model("Assets/models/P_CV2_p2/pcv2_p2.obj"));
-    houseProps.push_back(new Model("Assets/models/P_CV3_p1/pcv3_p1.obj"));
-    houseProps.push_back(new Model("Assets/models/P_CV3_p2/pcv3_p2.obj"));
-    houseProps.push_back(new Model("Assets/models/P_CV4_p1/pcv4_p1.obj"));
-    houseProps.push_back(new Model("Assets/models/P_CV4_p2/pcv4_p2.obj"));
-    houseProps.push_back(new Model("Assets/models/P_CV5_p1/pcv5_p1.obj"));
-    houseProps.push_back(new Model("Assets/models/P_CV6_p1/pcv6_p1.obj"));
-    houseProps.push_back(new Model("Assets/models/P_CV7_p1/pcv7_p1.obj"));
-    houseProps.push_back(new Model("Assets/models/P_CV8_p1/pcv8_p1.obj"));
-    houseProps.push_back(new Model("Assets/models/P_CV9_p1/pcv9_p1.obj"));
-    houseProps.push_back(new Model("Assets/models/P_Garage/p_garage.obj"));
-    houseProps.push_back(new Model("Assets/models/P_Principal/p_principal.obj"));
-    houseProps.push_back(new Model("Assets/models/Refrigerator/refrigerator.obj"));
-    houseProps.push_back(new Model("Assets/models/Shower/shower.obj"));
-    houseProps.push_back(new Model("Assets/models/Table/table.obj"));
-    houseProps.push_back(new Model("Assets/models/Toiled/toiled.obj"));
-    houseProps.push_back(new Model("Assets/models/Washbasin/washbasin.obj"));
+    // 1. La Casa y Cuartos
+    sceneProps.push_back(new Model("Assets/models/Casa/casa.obj"));
+    sceneProps.push_back(new Model("Assets/models/Bed/bed.obj"));
+    sceneProps.push_back(new Model("Assets/models/Cupboard/cupboard.obj"));
+    sceneProps.push_back(new Model("Assets/models/Desk/desk.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_Bathroom/p_bathroom.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_Bedroom/p_bedroom.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_Cocina/p_cocina.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_CV1_p1/pcv1_p1.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_CV1_p2/pcv1_p2.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_CV2_p1/pcv2_p1.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_CV2_p2/pcv2_p2.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_CV3_p1/pcv3_p1.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_CV3_p2/pcv3_p2.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_CV4_p1/pcv4_p1.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_CV4_p2/pcv4_p2.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_CV5_p1/pcv5_p1.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_CV6_p1/pcv6_p1.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_CV7_p1/pcv7_p1.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_CV8_p1/pcv8_p1.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_CV9_p1/pcv9_p1.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_Garage/p_garage.obj"));
+    sceneProps.push_back(new Model("Assets/models/P_Principal/p_principal.obj"));
+    sceneProps.push_back(new Model("Assets/models/Refrigerator/refrigerator.obj"));
+    sceneProps.push_back(new Model("Assets/models/Shower/shower.obj"));
+    sceneProps.push_back(new Model("Assets/models/Table/table.obj"));
+    sceneProps.push_back(new Model("Assets/models/Toiled/toiled.obj"));
+    sceneProps.push_back(new Model("Assets/models/Washbasin/washbasin.obj"));
 
+    // 2. TUS 5 OBJETOS DE SKETCHFAB (Malditos / A recolectar)
+    // Descomenta y pon las rutas reales cuando los tengan
+    // sceneProps.push_back(new Model("Assets/models/SketchfabObj1/obj1.obj"));
+    // sceneProps.push_back(new Model("Assets/models/SketchfabObj2/obj2.obj"));
+    // sceneProps.push_back(new Model("Assets/models/SketchfabObj3/obj3.obj"));
+    // sceneProps.push_back(new Model("Assets/models/SketchfabObj4/obj4.obj"));
+    // sceneProps.push_back(new Model("Assets/models/SketchfabObj5/obj5.obj"));
+
+    // 3. Luces
     setupHouseLights();
 
-    // Te teletransportamos adentro de la casa (A la coordenada X:264)
+    // 4. Posición Inicial
     if (camera) camera->Position = glm::vec3(264.0f, 3.0f, -2.0f);
-
-    currentState = SceneState::INSIDE_HOUSE;
 }
 
 void SceneManager::render(glm::mat4 view, glm::mat4 projection) {
@@ -91,35 +70,35 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection) {
     mainShader->setMat4("projection", projection);
     mainShader->setMat4("view", view);
 
+    // Posición de cámara para que funcionen los brillos del Phong (Specular)
+    mainShader->setVec3("viewPos", camera->Position);
+
     lightManager->sendLightsToShader(*mainShader);
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     mainShader->setMat4("model", modelMatrix);
 
-    if (currentState == SceneState::NEIGHBORHOOD) {
-        for (Model* prop : neighborhoodProps) prop->Draw(*mainShader);
-        // ¡Cero Skybox aquí!
-    }
-    else if (currentState == SceneState::INSIDE_HOUSE) {
-        for (Model* prop : houseProps) prop->Draw(*mainShader);
+    // Activamos la transparencia (Blender/Vidrio)
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        // El Skybox ahora solo se dibuja SI estamos dentro de la casa
-        glDepthFunc(GL_LEQUAL);
-        skyboxShader->use();
-        glm::mat4 skyView = glm::mat4(glm::mat3(view));
-        skyboxShader->setMat4("view", skyView);
-        skyboxShader->setMat4("projection", projection);
-
-        glBindVertexArray(skyboxVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
-        glDepthFunc(GL_LESS);
+    for (Model* prop : sceneProps) {
+        prop->Draw(*mainShader);
     }
+
+    glDisable(GL_BLEND);
 }
 
-// ... EL RESTO DE TUS FUNCIONES (setupHouseLights, setupSkybox, loadCubemap) QUEDAN EXACTAMENTE IGUAL A TU CÓDIGO ...
+void SceneManager::setupHouseLights() {
+    // Exactamente el mismo código que me enviaste con los 15 PointLights.
+    // Solo pégalo aquí adentro tal cual estaba.
+    PointLight* focoBath = new PointLight();
+    focoBath->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
+    focoBath->setPosition(glm::vec3(262.692f, 6.29839f, -5.6183f));
+    lightManager->addPointLight(focoBath);
+
+    // ... Pega el resto de los PointLights de tu código original ...
+}
 
 
 void SceneManager::setupHouseLights() {
@@ -201,66 +180,4 @@ void SceneManager::setupHouseLights() {
     lightManager->addPointLight(focoCV4P2);
 
 
-}
-
-// === CÓDIGO TÉCNICO DE GENERACIÓN DE SKYBOX ===
-void SceneManager::setupSkybox() {
-    float skyboxVertices[] = {
-        // Coordenadas de los 36 vértices de un cubo
-        -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,
-        -1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f, -1.0f,
-        -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f
-    };
-
-    glGenVertexArrays(1, &skyboxVAO);
-    glGenBuffers(1, &skyboxVBO);
-    glBindVertexArray(skyboxVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
-    // Las fotos de Anderson
-    std::vector<std::string> faces = {
-        "Assets/skybox/right.jpg", "Assets/skybox/left.jpg",
-        "Assets/skybox/top.jpg", "Assets/skybox/bottom.jpg",
-        "Assets/skybox/front.jpg", "Assets/skybox/back.jpg"
-    };
-    cubemapTexture = loadCubemap(faces);
-}
-
-unsigned int SceneManager::loadCubemap(std::vector<std::string> faces) {
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-
-    int width, height, nrChannels;
-    for (unsigned int i = 0; i < faces.size(); i++) {
-        unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
-        if (data) {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-            stbi_image_free(data);
-        }
-        else {
-            std::cout << "Fallo al cargar imagen de Skybox: " << faces[i] << std::endl;
-            stbi_image_free(data);
-        }
-    }
-    // Parámetros obligatorios para Skybox
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    return textureID;
 }

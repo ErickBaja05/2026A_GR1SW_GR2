@@ -7,70 +7,97 @@
 #include "Input/CollisionManager.h"
 #include "Input/GameLogic.h"
 
-Camera camera(glm::vec3(260.0f, 4.0f, 20.0f)); // Iniciamos un poco más arriba para simular la altura de los ojos
+// Iniciamos la cámara un poco más arriba para simular la altura de los ojos 
+// y en la posición inicial dentro de la casa.
+Camera camera(glm::vec3(264.0f, 3.0f, -2.0f));
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 int main() {
     // 1. Inicializamos la Ventana y OpenGL
-    Window gameWindow(1024, 768, "Simulador Interactivo - Arquitectura de Software");
+    Window gameWindow(1024, 768, "Escape Nocturno - Proyecto Computación Gráfica");
+
+    // Configuraciones globales de OpenGL
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // 2. Inicializamos Shaders
+    // 2. Inicializamos Shaders (Solo el de los modelos, adiós Skybox)
     Shader mainShader("Assets/shaders/model.vs", "Assets/shaders/model.fs");
-    Shader skyboxShader("Assets/shaders/skybox.vs", "Assets/shaders/skybox.fs");
 
     // 3. Inicializamos Managers
     LightManager lightManager;
-    SceneManager sceneManager(&mainShader, &skyboxShader, &lightManager, &camera);
 
+    // Al instanciar el SceneManager, automáticamente carga la casa (por su nuevo constructor)
+    SceneManager sceneManager(&mainShader, &lightManager, &camera);
 
-    // 4. Inicializamos Input
+    // ==== CONFIGURACIÓN DE LA LINTERNA DEL JUGADOR ====
+    FlashLight playerFlashLight;
+    playerFlashLight.properties.ambient = glm::vec3(0.05f); // Luz base muy tenue
+    playerFlashLight.properties.diffuse = glm::vec3(1.0f, 1.0f, 1.0f); // Blanco puro
+    playerFlashLight.properties.specular = glm::vec3(1.0f, 1.0f, 1.0f); // Brillo máximo
+    playerFlashLight.constant = 1.0f;
+    playerFlashLight.linear = 0.045f;
+    playerFlashLight.quadratic = 0.0075f;
+
+    // Apertura del cono de luz (Linterna enfocada)
+    playerFlashLight.cutOff = glm::cos(glm::radians(12.5f));
+    playerFlashLight.outerCutOff = glm::cos(glm::radians(17.5f));
+    playerFlashLight.isOn = true;
+
+    // Se la pasamos al LightManager
+    lightManager.setFlashLight(&playerFlashLight);
+    // ==================================================
+
+    // 4. Inicializamos Input y Lógica
     InputManager inputManager(&camera);
     CollisionManager collisionManager;
     GameLogic gameLogic(&collisionManager, &inputManager, &sceneManager, &lightManager, &camera);
 
-    // Configuramos los Callbacks de la ventana (Redirigidos al InputManager de Josue)
+    // Configuramos los Callbacks de la ventana para el Input
     GLFWwindow* rawWindow = gameWindow.getGLFWWindow();
     glfwSetWindowUserPointer(rawWindow, &inputManager);
 
     glfwSetCursorPosCallback(rawWindow, [](GLFWwindow* w, double x, double y) {
         static_cast<InputManager*>(glfwGetWindowUserPointer(w))->mouse_callback(w, x, y);
         });
+
     glfwSetScrollCallback(rawWindow, [](GLFWwindow* w, double x, double y) {
         static_cast<InputManager*>(glfwGetWindowUserPointer(w))->scroll_callback(w, x, y);
         });
-    glfwSetInputMode(rawWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    // 5. Estado Inicial
-    sceneManager.loadNeighborhood();
+    // Ocultar y capturar el cursor del ratón
+    glfwSetInputMode(rawWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // === GAME LOOP ===
     while (!gameWindow.shouldClose()) {
-        // Control del tiempo
+        // Control del tiempo (DeltaTime)
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
         // Fase 1: Input y Lógica
         inputManager.processInput(rawWindow, deltaTime);
-
         gameLogic.update();
 
-        // Fase 2: Limpieza de pantalla
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        // ==== ACTUALIZAR LA LINTERNA ====
+        // Hacemos que la luz emane desde la cámara y apunte hacia donde miramos
+        playerFlashLight.setPosition(camera.Position);
+        playerFlashLight.direction = camera.Front;
+        // ================================
+
+        // Fase 2: Limpieza de pantalla (Fondo negro para la oscuridad)
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Fase 3: Preparación de la Cámara
+        // Fase 3: Cálculo de Matrices de la Cámara
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), 1024.0f / 768.0f, 0.1f, 5000.0f);
         glm::mat4 view = camera.GetViewMatrix();
 
-        // Fase 4: Renderizado Maestro
+        // Fase 4: Renderizado de la Escena
         sceneManager.render(view, projection);
 
-        // Fase 5: Intercambio de Buffers
+        // Fase 5: Intercambio de Buffers (VSync) y Eventos
         gameWindow.swapBuffers();
         glfwPollEvents();
     }
