@@ -58,3 +58,16 @@ void InputManager::scroll_callback(GLFWwindow* window, double xoffset, double yo
 {
     camera->ProcessMouseScroll(yoffset);
 }
+
+bool InputManager::isKeyJustPressed(int key)
+{
+    if (!window) return false;
+
+    bool currentlyPressed = glfwGetKey(window, key) == GLFW_PRESS;
+    bool wasPressed = previousKeyState[key]; // si la tecla nunca se consultó, unordered_map la crea como false
+
+    previousKeyState[key] = currentlyPressed;
+
+    // Solo es "true" en el frame exacto de la transición false -> true
+    return currentlyPressed && !wasPressed;
+}

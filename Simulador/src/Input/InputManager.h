@@ -2,6 +2,7 @@
 #define INPUT_MANAGER_H
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <unordered_map>
 
 // Forward declarations para evitar referencias circulares
 class Camera;
@@ -17,6 +18,7 @@ public:
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
     void processInput(GLFWwindow* window, double deltaTime);
     bool isKeyPressed(int key) const;
+    bool isKeyJustPressed(int key);
 
 private:
     Camera* camera;
@@ -25,5 +27,6 @@ private:
     bool firstMouse;
     float lastX;
     float lastY;
+    std::unordered_map<int, bool> previousKeyState;
 };
 #endif

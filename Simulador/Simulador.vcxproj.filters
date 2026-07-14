@@ -27,9 +27,6 @@
     <ClCompile Include="src\Engine\SceneManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Lighting\LightManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Input\GameLogic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -39,7 +36,22 @@
     <ClCompile Include="src\Input\CollisionManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Interactable_Objects\Door.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Interactable_Objects\FloatAnimator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Interactable_Objects\Interactable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Lighting\LightManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\Scene\model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Interactable_Objects\LightSwitch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -62,9 +74,6 @@
     <ClInclude Include="src\Engine\SceneManager.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\SceneNode.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Input\CollisionManager.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -74,28 +83,20 @@
     <ClInclude Include="src\Input\InputManager.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Interactable_Objects\Door.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Interactable_Objects\FloatAnimator.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Interactable_Objects\Interactable.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\Lighting\LightManager.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\shaders\triangle.vs">
+    <ClInclude Include="src\Interactable_Objects\LightSwitch.h">
       <Filter>Source Files</Filter>
-    </None>
-    <None Include="Assets\shaders\triangle.fs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="Assets\shaders\model.vs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="Assets\shaders\model.fs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="Assets\shaders\skybox.vs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="Assets\shaders\skybox.fs">
-      <Filter>Source Files</Filter>
-    </None>
+    </ClInclude>
   </ItemGroup>
 </Project>
