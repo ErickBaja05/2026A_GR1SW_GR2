@@ -1,48 +1,66 @@
-#include "LightManager.h"
-#include <string>
+#include "../Lighting/LightManager.h"
 
-LightManager::LightManager() : hasDirLight(false), dirLightDirection(0.0f), dirLightColor(1.0f) {}
-
-LightManager::~LightManager() {
-    // La liberación de memoria de los PointLights dependerá de si el SceneManager
-    // los destruye, pero el vector interno se limpia aquí.
-    pointLights.clear(); 
+void LightManager::setDirectionalLight(glm::vec3 dir, glm::vec3 color) {
+    directionalLightDir = dir;
+    directionalLightColor = color;
 }
 
 void LightManager::addPointLight(PointLight* light) {
     pointLights.push_back(light);
 }
 
-void LightManager::setDirectionalLight(glm::vec3 direction, glm::vec3 color) {
-    dirLightDirection = direction;
-    dirLightColor = color;
-    hasDirLight = true;
+void LightManager::setFlashLight(FlashLight* light) {
+    playerFlashLight = light;
+}
+
+void LightManager::togglePointLight(int index, bool state) {
+    if (index >= 0 && index < pointLights.size()) {
+        if (!state) {
+            pointLights[index]->properties.diffuse = glm::vec3(0.0f);
+            pointLights[index]->properties.specular = glm::vec3(0.0f);
+        } else {
+            pointLights[index]->properties.diffuse = glm::vec3(0.8f);
+            pointLights[index]->properties.specular = glm::vec3(1.0f);
+        }
+    }
 }
 
 void LightManager::sendLightsToShader(Shader& shader) {
     shader.use();
 
-    // 1. Enviar Luz Direccional
-    shader.setBool("hasDirLight", hasDirLight);
-    if (hasDirLight) {
-        shader.setVec3("dirLight.direction", dirLightDirection);
-        shader.setVec3("dirLight.ambient", dirLightColor * 0.2f);
-        shader.setVec3("dirLight.diffuse", dirLightColor * 0.5f);
-        shader.setVec3("dirLight.specular", dirLightColor);
+    // 1. Luz Direccional
+    shader.setVec3("dirLight.direction", directionalLightDir);
+    shader.setVec3("dirLight.ambient", directionalLightColor * 0.2f);
+    shader.setVec3("dirLight.diffuse", directionalLightColor * 0.5f);
+    shader.setVec3("dirLight.specular", directionalLightColor * 0.4f);
+
+    // 2. Arreglo de Luces Puntuales
+    shader.setInt("nr_point_lights", static_cast<int>(pointLights.size()));
+    for (size_t i = 0; i < pointLights.size(); i++) {
+        std::string base = "pointLights[" + std::to_string(i) + "].";
+        shader.setVec3(base + "position", pointLights[i]->getGlobalPosition()); 
+        shader.setVec3(base + "ambient", pointLights[i]->properties.ambient);
+        shader.setVec3(base + "diffuse", pointLights[i]->properties.diffuse);
+        shader.setVec3(base + "specular", pointLights[i]->properties.specular);
+        shader.setFloat(base + "constant", pointLights[i]->constant);
+        shader.setFloat(base + "linear", pointLights[i]->linear);
+        shader.setFloat(base + "quadratic", pointLights[i]->quadratic);
     }
 
-    // 2. Enviar Focos (Point Lights)
-    shader.setInt("numPointLights", static_cast<int>(pointLights.size()));
-    
-    for (size_t i = 0; i < pointLights.size(); i++) {
-        std::string number = std::to_string(i);
-        
-        shader.setVec3("pointLights[" + number + "].position", pointLights[i]->getGlobalPosition());
-        shader.setVec3("pointLights[" + number + "].ambient", pointLights[i]->properties.ambient);
-        shader.setVec3("pointLights[" + number + "].diffuse", pointLights[i]->properties.diffuse);
-        shader.setVec3("pointLights[" + number + "].specular", pointLights[i]->properties.specular);
-        shader.setFloat("pointLights[" + number + "].constant", pointLights[i]->properties.constant);
-        shader.setFloat("pointLights[" + number + "].linear", pointLights[i]->properties.linear);
-        shader.setFloat("pointLights[" + number + "].quadratic", pointLights[i]->properties.quadratic);
+    // 3. Linterna
+    if (playerFlashLight && playerFlashLight->isOn) {
+        shader.setVec3("flashLight.position", playerFlashLight->getGlobalPosition());
+        shader.setVec3("flashLight.direction", playerFlashLight->direction);
+        shader.setVec3("flashLight.ambient", playerFlashLight->properties.ambient);
+        shader.setVec3("flashLight.diffuse", playerFlashLight->properties.diffuse);
+        shader.setVec3("flashLight.specular", playerFlashLight->properties.specular);
+        shader.setFloat("flashLight.constant", playerFlashLight->constant);
+        shader.setFloat("flashLight.linear", playerFlashLight->linear);
+        shader.setFloat("flashLight.quadratic", playerFlashLight->quadratic);
+        shader.setFloat("flashLight.cutOff", playerFlashLight->cutOff);
+        shader.setFloat("flashLight.outerCutOff", playerFlashLight->outerCutOff);
+    } else {
+        shader.setVec3("flashLight.diffuse", glm::vec3(0.0f));
+        shader.setVec3("flashLight.specular", glm::vec3(0.0f));
     }
 }
