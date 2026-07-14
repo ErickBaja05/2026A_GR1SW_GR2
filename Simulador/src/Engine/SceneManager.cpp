@@ -1,6 +1,7 @@
 #include "SceneManager.h"
 #include <iostream>
 
+
 SceneManager::SceneManager(Shader* main, LightManager* lm, Camera* cam) {
     mainShader = main;
     lightManager = lm;

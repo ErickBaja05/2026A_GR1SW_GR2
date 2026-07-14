@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include "../Graphics/shader.h"
-#include "../Graphics/model.h"
+#include "../Scene/model.h"
 #include "../Scene/camera.h"
 #include "../Lighting/LightManager.h"
 
