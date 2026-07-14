@@ -1,46 +1,33 @@
 #pragma once
-#include <glm/glm.hpp>
 #include <vector>
 #include <string>
-#include "SceneNode.h" // Hereda transformaciones de posición/rotación
+#include <glm/glm.hpp>
+#include "../Lighting/PointLight.h"
+#include "../Lighting/FlashLight.h"
+#include "../Graphics/shader.h"
 
-// Estructura base para las propiedades de la luz de Phong
-struct LightProperties {
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
-};
+class LightManager {
+private:
+    std::vector<PointLight*> pointLights;
+    std::vector<FlashLight*> flashLights;
 
-// Clase para Focos en el techo (PointLight)
-class PointLight : public SceneNode {
+    // Representación del Sol (Luz Direccional de afuera)
+    glm::vec3 sunDirection;
+    glm::vec3 sunColor;
+    float sunIntensity;
+
 public:
-    LightProperties properties;
-    
-    // Parámetros de Atenuación obligatorios
-    float constant;
-    float linear;
-    float quadratic;
+    LightManager();
+    ~LightManager() = default;
 
-    PointLight() : constant(1.0f), linear(0.09f), quadratic(0.032f) {}
-};
+    // Métodos para recolectar las luces del cuarto/escena actual
+    void registerPointLight(PointLight* light);
+    void registerFlashLight(FlashLight* light);
+    void clearLights();
 
-// Clase para la Linterna (FlashLight / SpotLight)
-class FlashLight : public SceneNode {
-public:
-    LightProperties properties;
-    glm::vec3 direction; // Dirección hacia donde apunta la linterna
-    
-    // Parámetros del cono de luz
-    float cutOff;      // Ángulo interno (en coseno)
-    float outerCutOff; // Ángulo externo para suavizado (en coseno)
-    
-    float constant;
-    float linear;
-    float quadratic;
+    // Configuración del Sol
+    void setSun(const glm::vec3& dir, const glm::vec3& col, float intensity);
 
-    bool isOn; // Estado de la linterna (Encendido/Apagado)
-
-    FlashLight() : cutOff(glm::cos(glm::radians(12.5f))), 
-                   outerCutOff(glm::cos(glm::radians(17.5f))), 
-                   constant(1.0f), linear(0.09f), quadratic(0.032f), isOn(true) {}
+    // Escanea y envía los datos recolectados de Phong a la GPU
+    void sendLightsToShader(Shader& shader);
 };

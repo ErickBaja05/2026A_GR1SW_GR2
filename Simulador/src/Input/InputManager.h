@@ -2,26 +2,28 @@
 #define INPUT_MANAGER_H
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <iostream>
 
+// Forward declarations para evitar referencias circulares
 class Camera;
+class SceneManager;
+class LightManager;
 
-class InputManager
-{
+class InputManager {
 public:
+    // Ahora recibe los tres componentes vitales
+   
     InputManager(Camera* camera);
-
     void mouse_callback(GLFWwindow* window, double xpos, double ypos);
     void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
     void processInput(GLFWwindow* window, double deltaTime);
+    bool isKeyPressed(int key) const;
 
 private:
     Camera* camera;
-    bool firstMouse;
+    GLFWwindow* window;
 
+    bool firstMouse;
     float lastX;
     float lastY;
-
 };
-
 #endif
