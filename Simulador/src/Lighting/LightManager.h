@@ -1,6 +1,9 @@
 #pragma once
 #include <vector>
 #include <string>
+#include "../Engine/SceneNode.h" 
+#include "../Lighting/PointLight.h" // inclusion de PointLight.h pour utiliser la classe PointLight
+#include "../Graphics/shader.h" // El compilador necesita saber qué es un Shader aquí
 #include <glm/glm.hpp>
 #include "../Lighting/PointLight.h"
 #include "../Lighting/FlashLight.h"
