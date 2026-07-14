@@ -15,6 +15,8 @@ int main() {
     // 1. Inicializamos la Ventana y OpenGL
     Window gameWindow(1024, 768, "Simulador Interactivo - Arquitectura de Software");
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // 2. Inicializamos Shaders
     Shader mainShader("Assets/shaders/model.vs", "Assets/shaders/model.fs");
@@ -22,7 +24,7 @@ int main() {
 
     // 3. Inicializamos Managers
     LightManager lightManager;
-    SceneManager sceneManager(&mainShader, &skyboxShader, &lightManager);
+    SceneManager sceneManager(&mainShader, &skyboxShader, &lightManager, &camera);
 
 
     // 4. Inicializamos Input

@@ -35,6 +35,9 @@ private:
     LightManager* lightManager;
     Camera* camera;
 
+    // Agrega esta variable en la sección 'private' de GameLogic.h
+    bool wasInteractionKeyPressed = false;
+
     // Código de la tecla configurada para interactuar (por ejemplo, GLFW_KEY_E)
     int interactionKey;
 
