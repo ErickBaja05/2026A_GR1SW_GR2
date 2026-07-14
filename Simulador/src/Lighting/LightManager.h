@@ -1,36 +1,55 @@
 #pragma once
+#include <glm/glm.hpp>
 #include <vector>
 #include <string>
 #include "../Engine/SceneNode.h" 
-#include "../Lighting/PointLight.h" // inclusion de PointLight.h pour utiliser la classe PointLight
 #include "../Graphics/shader.h" // El compilador necesita saber qué es un Shader aquí
-#include <glm/glm.hpp>
-#include "../Lighting/PointLight.h"
-#include "../Lighting/FlashLight.h"
-#include "../Graphics/shader.h"
 
+struct LightProperties {
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+};
+
+class PointLight : public SceneNode {
+public:
+    LightProperties properties;
+    float constant;
+    float linear;
+    float quadratic;
+    PointLight() : constant(1.0f), linear(0.09f), quadratic(0.032f) {}
+};
+
+class FlashLight : public SceneNode {
+public:
+    LightProperties properties;
+    glm::vec3 direction; 
+    float cutOff;      
+    float outerCutOff; 
+    float constant;
+    float linear;
+    float quadratic;
+    bool isOn; 
+
+    FlashLight() : cutOff(glm::cos(glm::radians(12.5f))), 
+                   outerCutOff(glm::cos(glm::radians(17.5f))), 
+                   constant(1.0f), linear(0.09f), quadratic(0.032f), isOn(true) {}
+};
+
+// === AQUÍ VA LA DECLARACIÓN DE LA CLASE ===
 class LightManager {
 private:
     std::vector<PointLight*> pointLights;
-    std::vector<FlashLight*> flashLights;
-
-    // Representación del Sol (Luz Direccional de afuera)
-    glm::vec3 sunDirection;
-    glm::vec3 sunColor;
-    float sunIntensity;
+    FlashLight* playerFlashLight;
+    glm::vec3 directionalLightDir; 
+    glm::vec3 directionalLightColor;
 
 public:
-    LightManager();
-    ~LightManager() = default;
-
-    // Métodos para recolectar las luces del cuarto/escena actual
-    void registerPointLight(PointLight* light);
-    void registerFlashLight(FlashLight* light);
-    void clearLights();
-
-    // Configuración del Sol
-    void setSun(const glm::vec3& dir, const glm::vec3& col, float intensity);
-
-    // Escanea y envía los datos recolectados de Phong a la GPU
+    LightManager() : playerFlashLight(nullptr) {} // Constructor seguro
+    
+    void setDirectionalLight(glm::vec3 dir, glm::vec3 color);
+    void addPointLight(PointLight* light);
+    void setFlashLight(FlashLight* light);
+    void togglePointLight(int index, bool state);
     void sendLightsToShader(Shader& shader);
 };
