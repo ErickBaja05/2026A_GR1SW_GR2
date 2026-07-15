@@ -1,59 +1,25 @@
 #include "SceneManager.h"
 #include <iostream>
-#include <stb_image.h> 
-#include "../Lighting/LightManager.h"
 #include <glm/gtc/matrix_transform.hpp>
-#include "../Interactable_Objects/HouseInteractableIds.h" // ajusta el path a tu estructura real
-#include "../Interactable_Objects/Interactable.h" // ajusta el path a tu estructura real
+#include "../Interactable_Objects/HouseInteractableIds.h" 
+#include "../Interactable_Objects/Interactable.h" 
 #include "../Interactable_Objects/Door.h"
-
 
 SceneManager::SceneManager(Shader* main, LightManager* lm, Camera* cam) {
     mainShader = main;
     lightManager = lm;
     camera = cam;
 
-    // Al instanciar, cargamos directamente la casa
     loadHouse();
 }
 
 SceneManager::~SceneManager() {
-    for (Model* prop : neighborhoodProps) delete prop;
     for (Model* prop : houseStaticProps) delete prop;
     for (auto& pair : houseDoorModels) delete pair.second;
-}
-
-// Nueva función de control
-void SceneManager::toggleScene() {
-    if (currentState == SceneState::NEIGHBORHOOD) {
-        loadHouse();
-    }
-    else {
-        loadNeighborhood();
-    }
-}
-
-void SceneManager::loadNeighborhood() {
-    std::cout << "[SceneManager] Cargando Vecindario..." << std::endl;
-    for (Model* prop : houseStaticProps) delete prop;
-    houseStaticProps.clear();
-    for (auto& pair : houseDoorModels) delete pair.second;
-    houseDoorModels.clear();
-
-    neighborhoodProps.push_back(new Model("Assets/models/Barrio/barrio.obj"));
-    lightManager->setDirectionalLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(1.0f));
-
-    // Te teletransportamos a la calle (Libre movimiento)
-    //if (camera) camera->Position = glm::vec3(0.0f, 2.0f, 1.0f);
-
-    currentState = SceneState::NEIGHBORHOOD;
 }
 
 void SceneManager::loadHouse() {
-    std::cout << "[SceneManager] Entrando a la casa..." << std::endl;
-
-    for (Model* prop : neighborhoodProps) delete prop;
-    neighborhoodProps.clear();
+    std::cout << "[SceneManager] Cargando la casa..." << std::endl;
 
     for (Model* prop : houseStaticProps) delete prop;
     houseStaticProps.clear();
@@ -61,7 +27,7 @@ void SceneManager::loadHouse() {
     for (auto& pair : houseDoorModels) delete pair.second;
     houseDoorModels.clear();
 
-    // Props sin transformación individual (se dibujan con matriz identidad, igual que antes)
+    // Modelos estáticos
     houseStaticProps.push_back(new Model("Assets/models/Casa/casa.obj"));
     houseStaticProps.push_back(new Model("Assets/models/Bed/bed.obj"));
     houseStaticProps.push_back(new Model("Assets/models/Cupboard/cupboard.obj"));
@@ -72,7 +38,7 @@ void SceneManager::loadHouse() {
     houseStaticProps.push_back(new Model("Assets/models/Toiled/toiled.obj"));
     houseStaticProps.push_back(new Model("Assets/models/Washbasin/washbasin.obj"));
 
-    // Puertas: mismo id que usó InteractableManager al crear su Door/Trigger (ver HouseInteractableIds.h)
+    // Puertas animadas
     houseDoorModels[HouseInteractableIds::Door_CV1_P1] = new Model("Assets/models/P_CV1_p1/pcv1_p1.obj");
     houseDoorModels[HouseInteractableIds::Door_CV2_P1] = new Model("Assets/models/P_CV2_p1/pcv2_p1.obj");
     houseDoorModels[HouseInteractableIds::Door_CV3_P1] = new Model("Assets/models/P_CV3_p1/pcv3_p1.obj");
@@ -95,75 +61,49 @@ void SceneManager::loadHouse() {
     houseDoorModels[HouseInteractableIds::Door_Principal] = new Model("Assets/models/P_Principal/p_principal.obj");
 
     setupHouseLights();
-
-    // Te teletransportamos adentro de la casa (A la coordenada X:264)
-    //if (camera) camera->Position = glm::vec3(264.0f, 3.0f, -2.0f);
-
-    currentState = SceneState::INSIDE_HOUSE;
 }
 
 void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vector<Interactable*>& interactables) {
     mainShader->use();
     mainShader->setMat4("projection", projection);
     mainShader->setMat4("view", view);
-
-    // Posición de cámara para que funcionen los brillos del Phong (Specular)
     mainShader->setVec3("viewPos", camera->Position);
 
     lightManager->sendLightsToShader(*mainShader);
 
-    if (currentState == SceneState::NEIGHBORHOOD) {
-        glm::mat4 modelMatrix = glm::mat4(1.0f);
-        mainShader->setMat4("model", modelMatrix);
-        for (Model* prop : neighborhoodProps) prop->Draw(*mainShader);
-        // ¡Cero Skybox aquí!
-    }
-    else if (currentState == SceneState::INSIDE_HOUSE) {
-        // Props sin transformación individual: misma matriz identidad para todos, como antes
-        glm::mat4 identityMatrix = glm::mat4(1.0f);
-        mainShader->setMat4("model", identityMatrix);
-        for (Model* prop : houseStaticProps) prop->Draw(*mainShader);
+    // Parches de la linterna y luz base
+    mainShader->setVec3("flashLight.position", camera->Position);
+    mainShader->setVec3("flashLight.direction", camera->Front);
+    mainShader->setVec3("dirLight.ambient", glm::vec3(0.4f, 0.4f, 0.4f));
 
-        // Puertas: cada una con su propia matriz según su rotación actual
-        renderDoors(interactables);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        // El Skybox ahora solo se dibuja SI estamos dentro de la casa
-        glDepthFunc(GL_LEQUAL);
-        skyboxShader->use();
-        glm::mat4 skyView = glm::mat4(glm::mat3(view));
-        skyboxShader->setMat4("view", skyView);
-        skyboxShader->setMat4("projection", projection);
+    // Render estático
+    glm::mat4 identityMatrix = glm::mat4(1.0f);
+    mainShader->setMat4("model", identityMatrix);
 
-        glBindVertexArray(skyboxVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
-        glDepthFunc(GL_LESS);
-    }
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    for (Model* prop : houseStaticProps) prop->Draw(*mainShader);
+
+    // Render dinámico (Puertas animadas)
+    renderDoors(interactables);
 
     glDisable(GL_BLEND);
 }
 
 void SceneManager::renderDoors(const std::vector<Interactable*>& interactables) {
-    // mainShader ya está activo y projection/view ya fueron seteados por render().
     for (Interactable* obj : interactables) {
         if (!obj || obj->getType() != InteractableType::Door) {
             continue;
         }
 
         auto it = houseDoorModels.find(obj->getId());
-        if (it == houseDoorModels.end()) {
-            // No hay modelo cargado para este id. No debería pasar si los ids
-            // en HouseInteractableIds.h calzan con InteractableManager y loadHouse().
-            continue;
-        }
+        if (it == houseDoorModels.end()) continue;
 
         Door* door = static_cast<Door*>(obj);
 
-        // El modelo fue exportado con el pivote en la bisagra (vértices locales
-        // relativos a ella), así que basta con trasladar a esa posición y rotar
-        // sobre Y — no hace falta ningún offset adicional.
         glm::mat4 modelMatrix = glm::mat4(1.0f);
         modelMatrix = glm::translate(modelMatrix, door->getPosition());
         modelMatrix = glm::rotate(modelMatrix, glm::radians(door->getRotationY()), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -173,25 +113,17 @@ void SceneManager::renderDoors(const std::vector<Interactable*>& interactables) 
     }
 }
 
-// ... EL RESTO DE TUS FUNCIONES (setupHouseLights, setupSkybox, loadCubemap) QUEDAN EXACTAMENTE IGUAL A TU CÓDIGO ...
-
-
 void SceneManager::setupHouseLights() {
-    // Inyectamos las coordenadas exactas de Anderson ya procesadas para OpenGL
-
-    // 1. Foco Bathroom[cite: 3]
     PointLight* focoBath = new PointLight();
     focoBath->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoBath->setPosition(glm::vec3(262.692f, 6.29839f, -5.6183f));
     lightManager->addPointLight(focoBath);
 
-    // 2. Foco Bedroom[cite: 3]
     PointLight* focoBed = new PointLight();
     focoBed->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoBed->setPosition(glm::vec3(263.338f, 6.37f, 1.56341f));
     lightManager->addPointLight(focoBed);
 
-    // 3. Focos Cocina[cite: 3]
     PointLight* focoCocina1 = new PointLight();
     focoCocina1->setPosition(glm::vec3(270.563f, 2.84878f, -5.3348f));
     lightManager->addPointLight(focoCocina1);
@@ -200,7 +132,6 @@ void SceneManager::setupHouseLights() {
     focoCocina2->setPosition(glm::vec3(270.187f, 6.29f, -0.825975f));
     lightManager->addPointLight(focoCocina2);
 
-    // 4. Focos Cuartos Varios (CV)[cite: 3]
     PointLight* focoCV1P1 = new PointLight();
     focoCV1P1->setPosition(glm::vec3(264.525f, 2.8753f, 1.73852f));
     lightManager->addPointLight(focoCV1P1);
@@ -237,7 +168,6 @@ void SceneManager::setupHouseLights() {
     focoGarage->setPosition(glm::vec3(256.109f, 2.7353f, 0.15f));
     lightManager->addPointLight(focoGarage);
 
-
     PointLight* focoCV1P2 = new PointLight();
     focoCV1P2->setPosition(glm::vec3(261.319f, 6.35819f, -1.89796f));
     lightManager->addPointLight(focoCV1P2);
@@ -253,6 +183,4 @@ void SceneManager::setupHouseLights() {
     PointLight* focoCV4P2 = new PointLight();
     focoCV4P2->setPosition(glm::vec3(266.564f, 6.33819f, -4.96717f));
     lightManager->addPointLight(focoCV4P2);
-
-
 }

@@ -9,7 +9,8 @@
 #include "Interactable_Objects/Interactable.h"
 #include "Interactable_Objects/InteractableManager.h"
 
-Camera camera(glm::vec3(260.0f, 3.0f, 20.0f)); // Iniciamos un poco más arriba para simular la altura de los ojos
+// X: 264 (frente a la casa), Y: 4 (altura), Z: 15 (afuera en la calle)
+Camera camera(glm::vec3(264.0f, 4.0f, 15.0f)); // Iniciamos un poco más arriba para simular la altura de los ojos
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
@@ -26,6 +27,9 @@ int main() {
     // 3. Inicializamos Managers
     LightManager lightManager;
 
+    // === ¡NUEVO! LUZ DE LUNA PARA PODER VER LA CASA ===
+    // === ¡NUEVO! LUZ DE LUNA POTENTE Y EN DIAGONAL ===
+    lightManager.setDirectionalLight(glm::vec3(-1.0f, -0.5f, -0.5f), glm::vec3(0.8f, 0.8f, 0.9f));
     // Al instanciar el SceneManager, automáticamente carga la casa (por su nuevo constructor)
     SceneManager sceneManager(&mainShader, &lightManager, &camera);
 
@@ -39,8 +43,9 @@ int main() {
     playerFlashLight.quadratic = 0.0075f;
 
     // Apertura del cono de luz (Linterna enfocada)
-    playerFlashLight.cutOff = glm::cos(glm::radians(12.5f));
-    playerFlashLight.outerCutOff = glm::cos(glm::radians(17.5f));
+  // Cambia los ángulos de 12.5 y 17.5 a 20 y 30 para tener un foco más amplio
+    playerFlashLight.cutOff = glm::cos(glm::radians(20.0f));
+    playerFlashLight.outerCutOff = glm::cos(glm::radians(30.0f));
     playerFlashLight.isOn = true;
 
     // Se la pasamos al LightManager
@@ -91,11 +96,21 @@ int main() {
         // ================================
 
         // Fase 2: Limpieza de pantalla (Fondo negro para la oscuridad)
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Fase 3: Cálculo de Matrices de la Cámara
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), 1024.0f / 768.0f, 0.1f, 5000.0f);
+
+        // FASE 3
+        // 1. Preguntamos el tamaño real y actual de la ventana en píxeles
+        int width, height;
+        glfwGetFramebufferSize(rawWindow, &width, &height);
+
+        // 2. Le ordenamos a OpenGL que su lienzo de dibujo ocupe el 100% de ese tamaño
+        glViewport(0, 0, width, height);
+
+        // 3. Calculamos la proyección dividiendo el ancho real para el alto real
+        // Esto evita que la casa se vea estirada o aplastada si cambias el tamaño de la ventana
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 5000.0f);
         glm::mat4 view = camera.GetViewMatrix();
 
         // Fase 4: Renderizado Maestro
