@@ -1,84 +1,3 @@
-//#define STB_IMAGE_IMPLEMENTATION 
-//#include "Engine/Window.h"
-//#include "Engine/SceneManager.h"
-//#include "Lighting/LightManager.h" 
-//#include "Scene/camera.h"
-//#include "Input/InputManager.h" 
-//#include "Input/CollisionManager.h"
-//#include "Input/GameLogic.h"
-//
-//Camera camera(glm::vec3(260.0f, 4.0f, 20.0f)); // Iniciamos un poco más arriba para simular la altura de los ojos
-//float deltaTime = 0.0f;
-//float lastFrame = 0.0f;
-//
-//int main() {
-//    // 1. Inicializamos la Ventana y OpenGL
-//    Window gameWindow(1024, 768, "Simulador Interactivo - Arquitectura de Software");
-//    glEnable(GL_DEPTH_TEST);
-//
-//    // 2. Inicializamos Shaders
-//    Shader mainShader("Assets/shaders/model.vs", "Assets/shaders/model.fs");
-//    Shader skyboxShader("Assets/shaders/skybox.vs", "Assets/shaders/skybox.fs");
-//
-//    // 3. Inicializamos Managers
-//    LightManager lightManager;
-//    SceneManager sceneManager(&mainShader, &skyboxShader, &lightManager);
-//
-//
-//    // 4. Inicializamos Input
-//    InputManager inputManager(&camera);
-//    CollisionManager collisionManager;
-//    GameLogic gameLogic(&collisionManager, &inputManager, &sceneManager, &lightManager, &camera);
-//
-//    // Configuramos los Callbacks de la ventana (Redirigidos al InputManager de Josue)
-//    GLFWwindow* rawWindow = gameWindow.getGLFWWindow();
-//    glfwSetWindowUserPointer(rawWindow, &inputManager);
-//
-//    glfwSetCursorPosCallback(rawWindow, [](GLFWwindow* w, double x, double y) {
-//        static_cast<InputManager*>(glfwGetWindowUserPointer(w))->mouse_callback(w, x, y);
-//        });
-//    glfwSetScrollCallback(rawWindow, [](GLFWwindow* w, double x, double y) {
-//        static_cast<InputManager*>(glfwGetWindowUserPointer(w))->scroll_callback(w, x, y);
-//        });
-//    glfwSetInputMode(rawWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-//
-//    // 5. Estado Inicial
-//    sceneManager.loadNeighborhood();
-//
-//    // === GAME LOOP ===
-//    while (!gameWindow.shouldClose()) {
-//        // Control del tiempo
-//        float currentFrame = static_cast<float>(glfwGetTime());
-//        deltaTime = currentFrame - lastFrame;
-//        lastFrame = currentFrame;
-//
-//        // Fase 1: Input y Lógica
-//        inputManager.processInput(rawWindow, deltaTime);
-//
-//        gameLogic.update(deltaTime);
-//
-//        // Fase 2: Limpieza de pantalla
-//        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//
-//        // Fase 3: Preparación de la Cámara
-//        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), 1024.0f / 768.0f, 0.1f, 5000.0f);
-//        glm::mat4 view = camera.GetViewMatrix();
-//
-//        // Fase 4: Renderizado Maestro
-//        sceneManager.render(view, projection);
-//
-//        // Fase 5: Intercambio de Buffers
-//        gameWindow.swapBuffers();
-//        glfwPollEvents();
-//    }
-//
-//    return 0;
-//}
-
-
-// ===========================================================================================================
-
 #define STB_IMAGE_IMPLEMENTATION 
 #include "Engine/Window.h"
 #include "Engine/SceneManager.h"
@@ -87,11 +6,10 @@
 #include "Input/InputManager.h" 
 #include "Input/CollisionManager.h"
 #include "Input/GameLogic.h"
-#include "Interactable_Objects/Door.h"
-#include "Interactable_Objects/LightSwitch.h"
+#include "Interactable_Objects/Interactable.h"
+#include "Interactable_Objects/InteractableManager.h"
 
-
-Camera camera(glm::vec3(260.0f, 4.0f, 20.0f)); // Iniciamos un poco más arriba para simular la altura de los ojos
+Camera camera(glm::vec3(260.0f, 3.0f, 20.0f)); // Iniciamos un poco más arriba para simular la altura de los ojos
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
@@ -106,42 +24,13 @@ int main() {
 
     // 3. Inicializamos Managers
     LightManager lightManager;
-    SceneManager sceneManager(&mainShader, &skyboxShader, &lightManager);
+    SceneManager sceneManager(&mainShader, &skyboxShader, &lightManager, &camera);
 
 
     // 4. Inicializamos Input
     InputManager inputManager(&camera);
     CollisionManager collisionManager;
     GameLogic gameLogic(&collisionManager, &inputManager, &sceneManager, &lightManager, &camera);
-
-    static Door testDoor(1, glm::vec3(262.0f, 4.0f, 20.0f));
-    static LightSwitch testLightSwitch(0, glm::vec3(258.0f, 4.0f, 20.0f));
-
-
-    gameLogic.registerInteractable(&testDoor);
-    gameLogic.registerInteractable(&testLightSwitch);
-
-    Trigger doorTrigger;
-    doorTrigger.name = "Puerta de prueba";
-    doorTrigger.type = TriggerType::Door;
-    doorTrigger.box.min = glm::vec3(261.0f, 3.0f, 19.0f);
-    doorTrigger.box.max = glm::vec3(263.0f, 5.0f, 21.0f);
-    doorTrigger.enabled = true;
-    doorTrigger.targetId = 1;
-    collisionManager.addTrigger(doorTrigger);
-
-    Trigger lightTrigger;
-    lightTrigger.name = "Interruptor de prueba";
-    lightTrigger.type = TriggerType::LightSwitch;
-    lightTrigger.box.min = glm::vec3(257.0f, 3.0f, 19.0f);
-    lightTrigger.box.max = glm::vec3(259.0f, 5.0f, 21.0f);
-    lightTrigger.enabled = true;
-    lightTrigger.targetId = 0;
-    collisionManager.addTrigger(lightTrigger);
-
-
-
-
 
     // Configuramos los Callbacks de la ventana (Redirigidos al InputManager de Josue)
     GLFWwindow* rawWindow = gameWindow.getGLFWWindow();
@@ -155,8 +44,13 @@ int main() {
         });
     glfwSetInputMode(rawWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    auto interactables = InteractableManager::createHouseInteractables(collisionManager);
+    for (auto& obj : interactables) {
+        gameLogic.registerInteractable(obj.get());
+    }
+
     // 5. Estado Inicial
-    sceneManager.loadNeighborhood();
+    sceneManager.loadHouse();
 
     // === GAME LOOP ===
     while (!gameWindow.shouldClose()) {
@@ -179,7 +73,7 @@ int main() {
         glm::mat4 view = camera.GetViewMatrix();
 
         // Fase 4: Renderizado Maestro
-        sceneManager.render(view, projection);
+        sceneManager.render(view, projection, gameLogic.getInteractables());
 
         // Fase 5: Intercambio de Buffers
         gameWindow.swapBuffers();
@@ -188,7 +82,3 @@ int main() {
 
     return 0;
 }
-
-
-
-

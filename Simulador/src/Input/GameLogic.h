@@ -38,6 +38,13 @@ public:
      */
     void registerInteractable(Interactable* interactable);
 
+    /**
+     * Expone los interactables registrados para que SceneManager pueda consultar
+     * su posición/rotación al renderizar (ej. puertas). GameLogic sigue siendo
+     * el dueño de esta lista (no-owning para quien la lee).
+     */
+    const std::vector<Interactable*>& getInteractables() const { return interactables; }
+
 private:
     // Punteros a las dependencias externas
     CollisionManager* collisionManager;
@@ -45,6 +52,9 @@ private:
     SceneManager* sceneManager;
     LightManager* lightManager;
     Camera* camera;
+
+    // Agrega esta variable en la sección 'private' de GameLogic.h
+    bool wasInteractionKeyPressed = false;
 
     // Código de la tecla configurada para interactuar (por ejemplo, GLFW_KEY_E)
     int interactionKey;
