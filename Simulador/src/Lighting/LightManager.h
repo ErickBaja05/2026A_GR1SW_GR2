@@ -37,7 +37,7 @@ public:
                    constant(1.0f), linear(0.09f), quadratic(0.032f), isOn(true) {}
 };
 
-// === AQUÍ VA LA DECLARACIÓN DE LA CLASE ===
+// === AQUÍ se DECLARA LA CLASE ===
 class LightManager {
 private:
     std::vector<PointLight*> pointLights;

@@ -94,11 +94,12 @@ int main() {
         //playerFlashLight.setPosition(camera.Position);
         //playerFlashLight.direction = camera.Front;
         // ================================
+        // === ACTUALIZAR LUCES DINÁMICAS EFECTO DISCOTECA ===
+        sceneManager.updateLights(currentFrame);
 
         // Fase 2: Limpieza de pantalla (Fondo negro para la oscuridad)
         glClearColor(1.0f, 0.7f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 
         // FASE 3
         // 1. Preguntamos el tamaño real y actual de la ventana en píxeles
@@ -113,6 +114,7 @@ int main() {
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 5000.0f);
         glm::mat4 view = camera.GetViewMatrix();
 
+        
         // Fase 4: Renderizado Maestro
         sceneManager.render(view, projection, gameLogic.getInteractables());
 
