@@ -2,10 +2,13 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <cstdlib> // Para generar números aleatorios (rand)
+#include <ctime>   // Para la semilla (time)
 #include "../Graphics/shader.h"
 #include "../Scene/model.h" // ¡Corregido el path para evitar el error E1696!
 #include "../Scene/camera.h"
 #include "../Lighting/LightManager.h"
+#include <stb_image.h>
 
 // Forward declaration
 class Interactable;
@@ -25,7 +28,14 @@ private:
     Shader* mainShader;
     LightManager* lightManager;
     Camera* camera;
+    Model* bedModel; // Guardamos el puntero para clonarlo después
+    unsigned int floorVAO, floorVBO;
+    unsigned int floorTexture;
+    // Lista de offsets (desplazamientos) para el vecindario
+    std::vector<glm::vec3> vecindarioOffsets;
+    // Guardaremos la cantidad total de vértices del súper-piso
+    int totalFloorVertices;
 
     void setupHouseLights();
-    void renderDoors(const std::vector<Interactable*>& interactables);
+    void renderDoors(const std::vector<Interactable*>& interactables, glm::vec3 houseOffset);
 };
