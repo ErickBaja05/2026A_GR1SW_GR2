@@ -41,6 +41,8 @@ public:
     // NUEVAS FUNCIONES PARA EL INPUT
     void ciclarTexturaInterior();
     void ciclarTexturaExterior();
+    // NUEVO: Función para dibujar la luna en el cielo
+    void renderMoon(glm::mat4 view, glm::mat4 projection, glm::vec3 position);
 
 private:
     Shader* mainShader;

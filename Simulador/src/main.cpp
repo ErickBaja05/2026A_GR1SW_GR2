@@ -97,10 +97,60 @@ int main() {
         // === ACTUALIZAR LUCES DINÁMICAS EFECTO DISCOTECA ===
         sceneManager.updateLights(currentFrame);
 
-        // Fase 2: Limpieza de pantalla (Fondo negro para la oscuridad)
-        glClearColor(1.0f, 0.7f, 0.2f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // ==========================================================
+        // 1. Cálculo de las posiciones (Sol y Luna)
+        // ==========================================================
+        float time = currentFrame * 0.2f;
+        float radius = 80.0f;
 
+        // Centro del vecindario
+        glm::vec3 vecindarioCentro(264.0f, 0.0f, -10.0f);
+
+        // El SOL y la LUNA están en lados diametralmente opuestos
+        glm::vec3 posSol = vecindarioCentro + glm::vec3(glm::cos(time) * radius, glm::sin(time) * radius, 0.0f);
+        glm::vec3 posLuna = vecindarioCentro + glm::vec3(-glm::cos(time) * radius, -glm::sin(time) * radius, 0.0f);
+
+        // 2. Factores de iluminación para el ciclo Día/Noche
+        float dayFactor = posSol.y / radius;
+        if (dayFactor < 0.0f) dayFactor = 0.0f;
+
+        float nightFactor = posLuna.y / radius;
+        if (nightFactor < 0.0f) nightFactor = 0.0f;
+
+        // 3. Atenuación de luz direccional (Mezclando Sol y Luna)
+        glm::vec3 sunLightColor = glm::vec3(0.9f, 0.8f, 0.7f) * dayFactor;
+
+        // NUEVO: Intensidad constante para la luna. 
+        // Multiplicamos por 10.0f y usamos 'clamp' para que alcance su máximo brillo 
+        // casi de inmediato al salir y se mantenga estática y fuerte toda la noche.
+        float moonIntensity = glm::clamp(nightFactor * 10.0f, 0.0f, 1.0f);
+
+        // Aumentamos los valores RGB para que la luz sea un azul/blanco mucho más brillante
+        glm::vec3 moonLightColor = glm::vec3(0.7f, 0.85f, 1.0f) * moonIntensity;
+
+        glm::vec3 currentLightColor = sunLightColor + moonLightColor;
+
+        // La luz proyecta sombras dependiendo de qué astro esté más alto
+        glm::vec3 lightDirection;
+        if (dayFactor > nightFactor) {
+            lightDirection = -glm::normalize(posSol - vecindarioCentro);
+        }
+        else {
+            lightDirection = -glm::normalize(posLuna - vecindarioCentro);
+        }
+        lightManager.setDirectionalLight(lightDirection, currentLightColor);
+
+        // ==========================================================
+        // 4. Limpieza de pantalla (Fondo cambia a oscuro en la noche)
+        // ==========================================================
+        // El color del cielo se rige exclusivamente por el dayFactor (el Sol).
+        // Cuando el Sol baja, el fondo se queda en el azul oscuro de la noche.
+        float red = (0.7f * dayFactor) + 0.02f;
+        float green = (0.5f * dayFactor) + 0.02f;
+        float blue = (0.3f * dayFactor) + 0.08f;
+
+        glClearColor(red, green, blue, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // FASE 3
         // 1. Preguntamos el tamaño real y actual de la ventana en píxeles
         int width, height;
@@ -118,6 +168,10 @@ int main() {
         // Fase 4: Renderizado Maestro
         sceneManager.render(view, projection, gameLogic.getInteractables());
 
+        // --- DIBUJAR LA LUNA / SOL ---
+        // Le pasamos la posición dinámica que calculaste al inicio del loop
+        //sceneManager.renderMoon(view, projection, dynamicLightPos);
+        sceneManager.renderMoon(view, projection, posLuna);
         // Fase 5: Intercambio de Buffers (VSync) y Eventos
         gameWindow.swapBuffers();
         glfwPollEvents();
