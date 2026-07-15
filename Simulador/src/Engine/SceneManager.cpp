@@ -19,13 +19,91 @@ SceneManager::~SceneManager() {
 }
 
 void SceneManager::loadHouse() {
-    std::cout << "[SceneManager] Cargando la casa..." << std::endl;
+    std::cout << "[SceneManager] Cargando la casa y el vecindario..." << std::endl;
+
+    //1. GENERAR EL VECINDARIO(4 Casas estratégicas para 60 FPS)
+        vecindarioOffsets.clear();
+
+    // Casa 1: La original (Donde spawnea el jugador)
+    vecindarioOffsets.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+
+    // Casa 2: Al frente (Avanzando en el eje X)
+    vecindarioOffsets.push_back(glm::vec3(-40.0f, 0.0f, 0.0f));
+
+    // Casa 3: A la izquierda (Moviéndonos en el eje Z)
+    vecindarioOffsets.push_back(glm::vec3(0.0f, 0.0f, -40.0f));
+
+    // Casa 4: Frente a la de la izquierda (Diagonal)
+    vecindarioOffsets.push_back(glm::vec3(-40.0f, 0.0f, -40.0f));
+
+    // 2. CONSTRUIR EL SÚPER-PISO EN C++
+    float fX0 = 0.2705f, fX1 = 0.4711f;
+    float fY0 = 0.6036f, fY1 = 0.7586f;
+
+    // Este es tu bloque base de 36 vértices (con el fix CCW de la cara superior)
+    float baseFloor[] = {
+        -0.5f, -0.5f, -0.5f,  fX0, fY0,   0.5f, -0.5f, -0.5f,  fX1, fY0,   0.5f,  0.5f, -0.5f,  fX1, fY1,
+         0.5f,  0.5f, -0.5f,  fX1, fY1,  -0.5f,  0.5f, -0.5f,  fX0, fY1,  -0.5f, -0.5f, -0.5f,  fX0, fY0,
+        -0.5f, -0.5f,  0.5f,  fX0, fY0,   0.5f, -0.5f,  0.5f,  fX1, fY0,   0.5f,  0.5f,  0.5f,  fX1, fY1,
+         0.5f,  0.5f,  0.5f,  fX1, fY1,  -0.5f,  0.5f,  0.5f,  fX0, fY1,  -0.5f, -0.5f,  0.5f,  fX0, fY0,
+        -0.5f,  0.5f,  0.5f,  fX0, fY1,  -0.5f,  0.5f, -0.5f,  fX1, fY1,  -0.5f, -0.5f, -0.5f,  fX1, fY0,
+        -0.5f, -0.5f, -0.5f,  fX1, fY0,  -0.5f, -0.5f,  0.5f,  fX0, fY0,  -0.5f,  0.5f,  0.5f,  fX0, fY1,
+         0.5f,  0.5f,  0.5f,  fX0, fY1,   0.5f,  0.5f, -0.5f,  fX1, fY1,   0.5f, -0.5f, -0.5f,  fX1, fY0,
+         0.5f, -0.5f, -0.5f,  fX1, fY0,   0.5f, -0.5f,  0.5f,  fX0, fY0,   0.5f,  0.5f,  0.5f,  fX0, fY1,
+        -0.5f, -0.5f, -0.5f,  fX0, fY0,   0.5f, -0.5f, -0.5f,  fX1, fY0,   0.5f, -0.5f,  0.5f,  fX1, fY1,
+         0.5f, -0.5f,  0.5f,  fX1, fY1,  -0.5f, -0.5f,  0.5f,  fX0, fY1,  -0.5f, -0.5f, -0.5f,  fX0, fY0,
+         // CARA SUPERIOR CCW
+         -0.5f,  0.5f,  0.5f,  fX0, fY1,   0.5f,  0.5f,  0.5f,  fX1, fY1,   0.5f,  0.5f, -0.5f,  fX1, fY0,
+          0.5f,  0.5f, -0.5f,  fX1, fY0,  -0.5f,  0.5f, -0.5f,  fX0, fY0,  -0.5f,  0.5f,  0.5f,  fX0, fY1
+    };
+
+    std::vector<float> giantFloor;
+
+    // Armamos el piso dinámicamente en RAM (25,600 bloques convertidos en 1 matriz gigante)
+    for (int x = -80; x <= 80; x++) {
+        for (int z = -80; z <= 80; z++) {
+            float offsetX = 260.0f + x;
+            float offsetZ = -5.0f + z;
+
+            for (int v = 0; v < 36; v++) {
+                giantFloor.push_back(baseFloor[v * 5 + 0] + offsetX); // X modificado
+                giantFloor.push_back(baseFloor[v * 5 + 1] - 1.0f);    // Y bajado a -1.0
+                giantFloor.push_back(baseFloor[v * 5 + 2] + offsetZ); // Z modificado
+                giantFloor.push_back(baseFloor[v * 5 + 3]);           // Textura U
+                giantFloor.push_back(baseFloor[v * 5 + 4]);           // Textura V
+            }
+        }
+    }
+
+    totalFloorVertices = giantFloor.size() / 5; // Guardamos cuántos vértices son para el render()
+
+    // 3. ENVIAR EL SÚPER-PISO A OPENGL (Se hace 1 sola vez)
+    glGenVertexArrays(1, &floorVAO);
+    glGenBuffers(1, &floorVBO);
+
+    glBindVertexArray(floorVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, floorVBO);
+    // Usamos giantFloor.data() y calculamos el peso en bytes
+    glBufferData(GL_ARRAY_BUFFER, giantFloor.size() * sizeof(float), giantFloor.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glBindVertexArray(0);
+
+    stbi_set_flip_vertically_on_load(true);
+    floorTexture = TextureFromFile("texture_floor.png", "Assets/textures", true);
+    stbi_set_flip_vertically_on_load(false);
 
     for (Model* prop : houseStaticProps) delete prop;
     houseStaticProps.clear();
 
     for (auto& pair : houseDoorModels) delete pair.second;
     houseDoorModels.clear();
+
+ 
 
     // Modelos estáticos
     houseStaticProps.push_back(new Model("Assets/models/Casa/casa.obj"));
@@ -75,70 +153,73 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
     mainShader->setVec3("flashLight.position", camera->Position);
     mainShader->setVec3("flashLight.direction", camera->Front);
 
-    glm::mat4 identityMatrix = glm::mat4(1.0f);
-
     // ============================================================
-    // PASADA 1: RENDEREAR SOLO LO OPACO (Paredes, piso, muebles)
+    // PASADA 1: RENDEREAR SOLO LO OPACO
     // ============================================================
     mainShader->setBool("isTransparentPass", false);
-    glDisable(GL_BLEND); // Lo opaco no necesita mezcla
-    glDepthMask(GL_TRUE); // Escribimos en el Z-Buffer para tapar lo de atrás
+    glDisable(GL_BLEND);
+    glDepthMask(GL_TRUE);
 
-    mainShader->setMat4("model", identityMatrix);
-    for (Model* prop : houseStaticProps) prop->Draw(*mainShader);
-    // ============================================================
-    // CLONANDO LA CAMA HORNEADA
-    // ============================================================
-    glm::mat4 cloneMatrix = glm::mat4(1.0f);
+    // --- 1. DIBUJAR SÚPER PISO (1 Draw Call) ---
+    glVertexAttrib3f(1, 0.0f, 1.0f, 0.0f);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, floorTexture);
+    mainShader->setInt("texture_diffuse1", 0);
 
-    // 1. El centro exacto de la cama original que calculó Anderson
-    glm::vec3 posOriginal = glm::vec3(261.39f, 3.9184f, 1.4983f);
+    glBindVertexArray(floorVAO);
+    mainShader->setMat4("model", glm::mat4(1.0f));
+    glDrawArrays(GL_TRIANGLES, 0, totalFloorVertices);
+    glBindVertexArray(0);
 
-    // 2. Coordenadas de tu CLON (La nueva ubicación en las gradas)
-    // NOTA: Como posOriginal era el centro de la cama, posNueva ahora también 
-    // representará dónde quieres que caiga el CENTRO de tu nueva cama.
-    glm::vec3 posNueva = glm::vec3(270.77f, 4.8823f, 2.5301f);
+    // --- 2. DIBUJAR VECINDARIO (OPTIMIZACIÓN DE CAMBIO DE ESTADO) ---
+    // Invertimos los bucles: Iteramos por modelo, y luego lo pintamos en todas las posiciones
+    for (Model* prop : houseStaticProps) {
+        for (glm::vec3 offset : vecindarioOffsets) {
+            glm::mat4 houseMatrix = glm::translate(glm::mat4(1.0f), offset);
+            mainShader->setMat4("model", houseMatrix);
+            prop->Draw(*mainShader);
+        }
+    }
 
-    // PASO C: Movemos el clon a su nueva casa
-    cloneMatrix = glm::translate(cloneMatrix, posNueva);
-
-    // PASO B: Rotamos 180 grados sobre Y (gira sobre su propio centro)
-    cloneMatrix = glm::rotate(cloneMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-    // PASO A: Des-horneamos la cama mandando su centro a (0,0,0)
-    cloneMatrix = glm::translate(cloneMatrix, -posOriginal);
-
-    // Dibujamos
-    mainShader->setMat4("model", cloneMatrix);
-    if (bedModel) bedModel->Draw(*mainShader);
-
-    renderDoors(interactables);
+    // Puertas
+    for (glm::vec3 offset : vecindarioOffsets) {
+        renderDoors(interactables, offset);
+    }
 
     // ============================================================
-    // PASADA 2: RENDEREAR SOLO LO TRANSPARENTE (Vidrios)
+    // PASADA 2: RENDEREAR SOLO LO TRANSPARENTE
     // ============================================================
     mainShader->setBool("isTransparentPass", true);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // ¡LA MAGIA OCURRE AQUÍ! Desactivamos la escritura en profundidad 
-    // para que los cristales no bloqueen el exterior.
     glDepthMask(GL_FALSE);
 
-    mainShader->setMat4("model", identityMatrix);
-    for (Model* prop : houseStaticProps) prop->Draw(*mainShader);
-    renderDoors(interactables);
+    // --- OPTIMIZACIÓN EXTREMA: SOLO ESTRUCTURA ---
+    // Como solo la "casa.obj" tiene ventanas, evitamos dibujar camas y roperos en la pasada transparente.
+    // Sabemos que la casa principal es el índice 0 en tu arreglo.
+    if (!houseStaticProps.empty()) {
+        Model* casaPrincipal = houseStaticProps[0];
+        for (glm::vec3 offset : vecindarioOffsets) {
+            glm::mat4 houseMatrix = glm::translate(glm::mat4(1.0f), offset);
+            mainShader->setMat4("model", houseMatrix);
+            casaPrincipal->Draw(*mainShader);
+        }
+    }
+
+    // Las puertas sí tienen vidrio, así que deben ir en esta pasada
+    for (glm::vec3 offset : vecindarioOffsets) {
+        renderDoors(interactables, offset);
+    }
 
     // Restaurar los estados por defecto
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
 }
 
-void SceneManager::renderDoors(const std::vector<Interactable*>& interactables) {
+// Actualiza tu función renderDoors para recibir y aplicar el offset:
+void SceneManager::renderDoors(const std::vector<Interactable*>& interactables, glm::vec3 houseOffset) {
     for (Interactable* obj : interactables) {
-        if (!obj || obj->getType() != InteractableType::Door) {
-            continue;
-        }
+        if (!obj || obj->getType() != InteractableType::Door) continue;
 
         auto it = houseDoorModels.find(obj->getId());
         if (it == houseDoorModels.end()) continue;
@@ -146,7 +227,8 @@ void SceneManager::renderDoors(const std::vector<Interactable*>& interactables) 
         Door* door = static_cast<Door*>(obj);
 
         glm::mat4 modelMatrix = glm::mat4(1.0f);
-        modelMatrix = glm::translate(modelMatrix, door->getPosition());
+        modelMatrix = glm::translate(modelMatrix, houseOffset); // 1. Mueve a la casa correcta
+        modelMatrix = glm::translate(modelMatrix, door->getPosition()); // 2. Mueve a la posición de la puerta
         modelMatrix = glm::rotate(modelMatrix, glm::radians(door->getRotationY()), glm::vec3(0.0f, 1.0f, 0.0f));
 
         mainShader->setMat4("model", modelMatrix);
