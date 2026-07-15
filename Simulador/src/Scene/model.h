@@ -54,6 +54,18 @@ public:
     vector<Mesh> meshes;
     string directory;
     bool gammaCorrection;
+
+    // Busca la malla por su nombre de Blender y le cambia el ID de la textura
+    void swapTexture(std::string meshName, unsigned int newTextureID) {
+        for (Mesh& mesh : meshes) {
+            if (mesh.name == meshName) {
+                if (mesh.textures.size() > 0) {
+                    mesh.textures[0].id = newTextureID; // ¡Magia! Reemplazamos la textura
+                }
+                return; // Encontramos la pared, salimos del bucle
+            }
+        }
+    }
 };
 
 #endif

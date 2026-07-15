@@ -37,6 +37,10 @@ public:
     std::vector<Model*> houseStaticProps;
     std::unordered_map<int, Model*> houseDoorModels;
 
+    // NUEVAS FUNCIONES PARA EL INPUT
+    void ciclarTexturaInterior();
+    void ciclarTexturaExterior();
+
 private:
     Shader* mainShader;
     LightManager* lightManager;
@@ -67,4 +71,10 @@ private:
 
     void setupHouseLights();
     void renderDoors(const std::vector<Interactable*>& interactables, glm::vec3 houseOffset);
+
+    // NUEVAS VARIABLES PARA LA MÁQUINA DE ESTADOS
+    std::vector<unsigned int> texturasInteriores;
+    std::vector<unsigned int> texturasExteriores;
+    int indiceTexturaInterior = 0;
+    int indiceTexturaExterior = 0;
 };

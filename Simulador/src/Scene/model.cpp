@@ -181,7 +181,9 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
         opacity = 1.0f;
     }
 
-    return Mesh(vertices, indices, textures);
+    Mesh newMesh(vertices, indices, textures);
+    newMesh.name = mesh->mName.C_Str(); // <--- NUEVO: Atrapamos el nombre de Blender
+    return newMesh;
 }
 
 // Carga u optimiza la carga de texturas desde el material
@@ -272,3 +274,4 @@ unsigned int TextureFromFile(const char* path, const string& directory, bool gam
 
     return textureID;
 }
+
