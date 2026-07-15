@@ -52,7 +52,7 @@ private:
      * (Reservado para cuando se agreguen las coordenadas de los interruptores;
      * el patrón es idéntico al de createDoorWithTrigger).
      */
-    static void createLightSwitchWithTrigger(int id, const glm::vec3& position,
+    static void createLightCubeWithTrigger(int id, const glm::vec3& position,
         std::vector<std::unique_ptr<Interactable>>& outInteractables,
         CollisionManager& collisionManager);
 
