@@ -531,6 +531,27 @@ void SceneManager::loadLayoutData(const std::string& filepath) {
     file.close();
     std::cout << "Se cargaron " << sceneLayout.size() << " clones desde el TXT con precisión absoluta." << std::endl;
 }
+void SceneManager::renderMoon(glm::mat4 view, glm::mat4 projection, glm::vec3 position) {
+    // La ocultamos cuando baja más allá del horizonte local de la casa (Y < -5.0f)
+    if (position.y > -5.0f) {
+        lightCubeShader->use();
+        lightCubeShader->setMat4("projection", projection);
+        lightCubeShader->setMat4("view", view);
+
+        glm::mat4 modelLight = glm::mat4(1.0f);
+        modelLight = glm::translate(modelLight, position);
+
+        // ¡LA LUNA AHORA ES GIGANTE PARA VERSE EN EL CIELO!
+        modelLight = glm::scale(modelLight, glm::vec3(8.0f));
+        lightCubeShader->setMat4("model", modelLight);
+
+        // Color blanco-azulado brillante para la luna
+        lightCubeShader->setVec3("lightColor", glm::vec3(0.9f, 0.95f, 1.0f));
+
+        glBindVertexArray(lightCubeVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+}
 
 void SceneManager::ciclarTexturaInterior() {
     if (texturasInteriores.empty() || houseStaticProps.empty()) return;
