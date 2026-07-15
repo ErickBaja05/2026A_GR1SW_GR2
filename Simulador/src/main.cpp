@@ -1,4 +1,4 @@
-#define STB_IMAGE_IMPLEMENTATION 
+
 #include "Engine/Window.h"
 #include "Engine/SceneManager.h"
 #include "Lighting/LightManager.h" 
