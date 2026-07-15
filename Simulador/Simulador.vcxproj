@@ -197,6 +197,9 @@
     <ClInclude Include="src\Scene\camera.h" />
     <ClInclude Include="src\Scene\model.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\shaders\model.fs" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

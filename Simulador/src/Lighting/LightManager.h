@@ -6,9 +6,10 @@
 #include "../Graphics/shader.h" // El compilador necesita saber qué es un Shader aquí
 
 struct LightProperties {
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
+    // Inicializar en 0.0f evita que OpenGL reciba basura y colapse en negro
+    glm::vec3 ambient = glm::vec3(0.0f);
+    glm::vec3 diffuse = glm::vec3(0.0f);
+    glm::vec3 specular = glm::vec3(0.0f);
 };
 
 class PointLight : public SceneNode {
