@@ -37,15 +37,16 @@ void GameLogic::update(double deltaTime) {
     // 4. Evaluar interacción
     if (activeTrigger && ePressed) {
         std::cout << "Interactuando en zona ID: " << activeTrigger->targetId << "\n";
-        Interactable* target = findInteractable(activeTrigger->targetId);
 
-        if (target && target->isEnabled()) {
-            target->interact();
-
-            // Lógica específica para focos
-            if (target->getType() == InteractableType::LightSwitch && lightManager) {
-                LightSwitch* lightSwitch = static_cast<LightSwitch*>(target);
-                lightManager->togglePointLight(lightSwitch->getId(), lightSwitch->getIsOn());
+        if (activeTrigger->type == TriggerType::LightSwitch && lightManager) {
+            std::cout << "Hola\n";
+            lightManager->togglePointLight(activeTrigger->targetId);
+        }
+        else {
+            // Para otros objetos físicos e interactuables (como las puertas)
+            Interactable* target = findInteractable(activeTrigger->targetId);
+            if (target && target->isEnabled()) {
+                target->interact();
             }
         }
     }
