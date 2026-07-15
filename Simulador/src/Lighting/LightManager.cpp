@@ -13,16 +13,17 @@ void LightManager::setFlashLight(FlashLight* light) {
     playerFlashLight = light;
 }
 
-void LightManager::togglePointLight(int index, bool state) {
-    if (index >= 0 && index < pointLights.size()) {
-        if (!state) {
-            pointLights[index]->properties.diffuse = glm::vec3(0.0f);
-            pointLights[index]->properties.specular = glm::vec3(0.0f);
-        } else {
-            pointLights[index]->properties.diffuse = glm::vec3(0.8f);
-            pointLights[index]->properties.specular = glm::vec3(1.0f);
+void LightManager::togglePointLight(int id) {
+    for (PointLight* light : pointLights) {
+        if (light && light->getId() == id) {
+            light->toggle(); // El foco cambia su estado internamente
+            std::cout << "[LightManager] Foco con ID " << id
+                << " cambiado a: " << (light->getIsOn() ? "ENCENDIDO" : "APAGADO")
+                << std::endl;
+            return;
         }
     }
+    std::cout << "[LightManager] ADVERTENCIA: No se encontro ningun foco registrado con el ID " << id << std::endl;
 }
 
 void LightManager::sendLightsToShader(Shader& shader) {

@@ -141,6 +141,25 @@ void SceneManager::loadHouse() {
     floorTexture = TextureFromFile("texture_floor.png", "Assets/textures", true);
     stbi_set_flip_vertically_on_load(false);
 
+    // Asegúrate de que estos nombres coincidan con los archivos en tu carpeta Assets/textures
+    stbi_set_flip_vertically_on_load(true);
+
+    // Interiores (Texturas para Mat_ParedInterior)
+    texturasInteriores.push_back(TextureFromFile("originalI.jpg", "Assets/textures", false)); // La original
+    texturasInteriores.push_back(TextureFromFile("concreto_claro.jpg", "Assets/textures", false));
+    texturasInteriores.push_back(TextureFromFile("haya.jpg", "Assets/textures", false));
+    texturasInteriores.push_back(TextureFromFile("tapiz.jpg", "Assets/textures", false));
+    texturasInteriores.push_back(TextureFromFile("ladrillo_blanco.jpg", "Assets/textures", false));
+
+    // Exteriores (Texturas para Mat_ParedExterior)
+    texturasExteriores.push_back(TextureFromFile("originalE.jpg", "Assets/textures", false)); // La original
+    texturasExteriores.push_back(TextureFromFile("concretoExpuesto.jpg", "Assets/textures", false));
+    texturasExteriores.push_back(TextureFromFile("stucoBeige.jpg", "Assets/textures", false));
+    texturasExteriores.push_back(TextureFromFile("aluminio.jpg", "Assets/textures", false));
+    texturasExteriores.push_back(TextureFromFile("maderaOscura.jpg", "Assets/textures", false));
+
+    stbi_set_flip_vertically_on_load(false);
+
     for (Model* prop : houseStaticProps) delete prop;
     houseStaticProps.clear();
 
@@ -148,25 +167,35 @@ void SceneManager::loadHouse() {
     houseDoorModels.clear();
 
  
-
     // ============================================================
-     // 1. ESTRUCTURAS FIJAS (Lo que siempre se dibuja 1 vez por casa)
-     // ============================================================
+        // 1. ESTRUCTURAS FIJAS (Se dibujan siempre, 1 vez por casa)
+        // ============================================================
     houseStaticProps.push_back(new Model("Assets/models/Casa/casa.obj"));
+    houseStaticProps.push_back(new Model("Assets/models/Cupboard/cupboard.obj"));
+    houseStaticProps.push_back(new Model("Assets/models/Car/car.obj"));
+    houseStaticProps.push_back(new Model("Assets/models/Refrigerator/refrigerator.obj"));
+    houseStaticProps.push_back(new Model("Assets/models/Table/table.obj"));
 
     // ============================================================
-    // 2. CATÁLOGO DE MOLDES (Solo se guardan en memoria, el TXT los dibuja)
-    // ¡Adiós a originalPositions y a houseStaticProps para los muebles!
+    // 2. CATÁLOGO DE CLONES (Manejados exclusivamente por el TXT)
     // ============================================================
+    modelCatalog.clear();
+    originalPositions.clear();
+
     modelCatalog["Bed"] = new Model("Assets/models/Bed/bed.obj");
-    modelCatalog["Cupboard"] = new Model("Assets/models/Cupboard/cupboard.obj");
-    modelCatalog["Car"] = new Model("Assets/models/Car/car.obj");
+    originalPositions["Bed"] = glm::vec3(261.39f, 3.9184f, 1.4983f);
+
     modelCatalog["Desk"] = new Model("Assets/models/Desk/desk.obj");
-    modelCatalog["Refrigerator"] = new Model("Assets/models/Refrigerator/refrigerator.obj");
+    originalPositions["Desk"] = glm::vec3(264.92f, 3.848f, 3.6209f);
+
     modelCatalog["Shower"] = new Model("Assets/models/Shower/shower.obj");
-    modelCatalog["Table"] = new Model("Assets/models/Table/table.obj");
+    originalPositions["Shower"] = glm::vec3(260.23f, 5.2473f, -4.5696f);
+
     modelCatalog["Toiled"] = new Model("Assets/models/Toiled/toiled.obj");
+    originalPositions["Toiled"] = glm::vec3(262.64f, 3.9414f, -6.8387f);
+
     modelCatalog["Washbasin"] = new Model("Assets/models/Washbasin/washbasin.obj");
+    originalPositions["Washbasin"] = glm::vec3(264.92f, 4.2298f, -5.5872f);
 
     // ============================================================
     // 3. PUERTAS ANIMADAS
@@ -212,12 +241,15 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
     glm::mat4 identityMatrix = glm::mat4(1.0f);
 
     // ============================================================
-    // LÓGICA DE DIBUJADO DE CLONES (ORIGINALES + CLONES)
-    // ============================================================
+     // LÓGICA DE DIBUJADO DE CLONES (Filtra solo lo que está en el catálogo)
+     // ============================================================
     auto DrawAllInstancedProps = [&](glm::vec3 houseOffset) {
         for (const PropInstance& prop : sceneLayout) {
+
+            // FILTRO INTELIGENTE: Si el txt manda "Car", se lo salta porque no está en modelCatalog
             if (modelCatalog.find(prop.name) != modelCatalog.end()) {
                 glm::mat4 cloneMatrix = glm::mat4(1.0f);
+                glm::vec3 posOrig = originalPositions[prop.name];
 
                 // 5. Trasladar al vecindario
                 cloneMatrix = glm::translate(cloneMatrix, houseOffset);
@@ -225,14 +257,14 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
                 // 4. Trasladar a la posición de Blender
                 cloneMatrix = glm::translate(cloneMatrix, prop.pos);
 
-                // 3. ROTACIÓN CORREGIDA: Agregamos el signo '-' por sugerencia de Anderson
+                // 3. Rotar (Con el signo '-' por sugerencia de Anderson)
                 cloneMatrix = glm::rotate(cloneMatrix, glm::radians(-prop.rotY), glm::vec3(0.0f, 1.0f, 0.0f));
 
                 // 2. Escalar
                 cloneMatrix = glm::scale(cloneMatrix, prop.scale);
 
-                // 1. DESHORNEAR (Matemática perfecta gracias a que el txt manda todo)
-                cloneMatrix = glm::translate(cloneMatrix, -prop.origPos);
+                // 1. DESHORNEAR (Matemática perfecta con nuestros valores quemados)
+                cloneMatrix = glm::translate(cloneMatrix, -posOrig);
 
                 mainShader->setMat4("model", cloneMatrix);
                 modelCatalog[prop.name]->Draw(*mainShader);
@@ -355,11 +387,13 @@ void SceneManager::renderDoors(const std::vector<Interactable*>& interactables, 
 
 void SceneManager::setupHouseLights() {
     PointLight* focoBath = new PointLight();
+    focoBath->setId(HouseInteractableIds::Light_Bath); // <--- Asignar ID
     focoBath->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoBath->setPosition(glm::vec3(262.692f, 6.29839f, -5.6183f));
     lightManager->addPointLight(focoBath);
 
     PointLight* focoBed = new PointLight();
+    focoBed->setId(HouseInteractableIds::Light_Bed);
     focoBed->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoBed->setPosition(glm::vec3(263.338f, 6.37f, 1.56341f));
     lightManager->addPointLight(focoBed);
@@ -374,71 +408,85 @@ void SceneManager::setupHouseLights() {
     lightManager->addPointLight(focoCocina1);
 
     PointLight* focoCocina2 = new PointLight();
+    focoCocina2->setId(HouseInteractableIds::Light_Cocina2);
     focoCocina2->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCocina2->setPosition(glm::vec3(270.187f, 6.29f, -0.825975f));
     lightManager->addPointLight(focoCocina2);
 
     PointLight* focoCV1P1 = new PointLight();
+    focoCV1P1->setId(HouseInteractableIds::Light_CV1_P1);
     focoCV1P1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV1P1->setPosition(glm::vec3(264.525f, 2.8753f, 1.73852f));
     lightManager->addPointLight(focoCV1P1);
 
     PointLight* focoCV2P1 = new PointLight();
+    focoCV2P1->setId(HouseInteractableIds::Light_CV2_P1);
     focoCV2P1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV2P1->setPosition(glm::vec3(261.209f, 2.59878f, -3.69f));
     lightManager->addPointLight(focoCV2P1);
 
     PointLight* focoCV3P1 = new PointLight();
+    focoCV3P1->setId(HouseInteractableIds::Light_CV3_P1);
     focoCV3P1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV3P1->setPosition(glm::vec3(263.78f, 2.81878f, -5.60954f));
     lightManager->addPointLight(focoCV3P1);
 
     PointLight* focoCV4P1 = new PointLight();
+    focoCV4P1->setId(HouseInteractableIds::Light_CV4_P1);
     focoCV4P1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV4P1->setPosition(glm::vec3(266.462f, 2.86878f, -4.77572f));
     lightManager->addPointLight(focoCV4P1);
 
     PointLight* focoCV5P1 = new PointLight();
+    focoCV5P1->setId(HouseInteractableIds::Light_CV5_P1);
     focoCV5P1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV5P1->setPosition(glm::vec3(266.482f, 2.86878f, -7.26744f));
     lightManager->addPointLight(focoCV5P1);
 
     PointLight* focoCV6P1 = new PointLight();
+    focoCV6P1->setId(HouseInteractableIds::Light_CV6_P1);
     focoCV6P1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV6P1->setPosition(glm::vec3(261.15f, 2.59878f, -6.32682f));
     lightManager->addPointLight(focoCV6P1);
 
     PointLight* focoCV8P1 = new PointLight();
+    focoCV8P1->setId(HouseInteractableIds::Light_CV8_P1);
     focoCV8P1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV8P1->setPosition(glm::vec3(254.419f, 2.7353f, -4.53488f));
     lightManager->addPointLight(focoCV8P1);
 
     PointLight* focoCV9P1 = new PointLight();
+    focoCV9P1->setId(HouseInteractableIds::Light_CV9_P1);
     focoCV9P1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV9P1->setPosition(glm::vec3(257.855f, 2.7353f, -4.60542f));
     lightManager->addPointLight(focoCV9P1);
 
     PointLight* focoGarage = new PointLight();
+    focoGarage->setId(HouseInteractableIds::Light_Garage);
     focoGarage->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoGarage->setPosition(glm::vec3(256.109f, 2.7353f, 0.15f));
     lightManager->addPointLight(focoGarage);
 
     PointLight* focoCV1P2 = new PointLight();
+    focoCV1P2->setId(HouseInteractableIds::Light_CV1_P2);
     focoCV1P2->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV1P2->setPosition(glm::vec3(261.319f, 6.35819f, -1.89796f));
     lightManager->addPointLight(focoCV1P2);
 
     PointLight* focoCV2P2 = new PointLight();
+    focoCV2P2->setId(HouseInteractableIds::Light_CV2_P2);
     focoCV2P2->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV2P2->setPosition(glm::vec3(270.03f, 6.35f, -6.18294f));
     lightManager->addPointLight(focoCV2P2);
 
     PointLight* focoCV3P3 = new PointLight();
+    focoCV3P3->setId(HouseInteractableIds::Light_CV3_P3);
     focoCV3P3->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV3P3->setPosition(glm::vec3(266.578f, 6.35819f, -7.61872f));
     lightManager->addPointLight(focoCV3P3);
 
     PointLight* focoCV4P2 = new PointLight();
+    focoCV4P2->setId(HouseInteractableIds::Light_CV4_P2);
     focoCV4P2->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV4P2->setPosition(glm::vec3(266.564f, 6.33819f, -4.96717f));
     lightManager->addPointLight(focoCV4P2);
@@ -482,4 +530,32 @@ void SceneManager::loadLayoutData(const std::string& filepath) {
     }
     file.close();
     std::cout << "Se cargaron " << sceneLayout.size() << " clones desde el TXT con precisión absoluta." << std::endl;
+}
+
+void SceneManager::ciclarTexturaInterior() {
+    if (texturasInteriores.empty() || houseStaticProps.empty()) return;
+
+    indiceTexturaInterior++;
+    if (indiceTexturaInterior >= texturasInteriores.size()) {
+        indiceTexturaInterior = 0;
+    }
+
+    unsigned int nuevaTextura = texturasInteriores[indiceTexturaInterior];
+    houseStaticProps[0]->swapTexture("Mat_ParedInterior", nuevaTextura);
+
+    std::cout << "Interior cambiado a textura #" << indiceTexturaInterior << std::endl;
+}
+
+void SceneManager::ciclarTexturaExterior() {
+    if (texturasExteriores.empty() || houseStaticProps.empty()) return;
+
+    indiceTexturaExterior++;
+    if (indiceTexturaExterior >= texturasExteriores.size()) {
+        indiceTexturaExterior = 0;
+    }
+
+    unsigned int nuevaTextura = texturasExteriores[indiceTexturaExterior];
+    houseStaticProps[0]->swapTexture("Mat_ParedExterior", nuevaTextura);
+
+    std::cout << "Exterior cambiado a textura #" << indiceTexturaExterior << std::endl;
 }

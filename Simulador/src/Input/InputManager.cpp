@@ -11,6 +11,8 @@ InputManager::InputManager(Camera* camera)
     lastX = 512.0f;
     lastY = 384.0f;
 }
+
+
 // Teclado
 void InputManager::processInput(GLFWwindow* window, double deltaTime)
 {
@@ -31,7 +33,7 @@ void InputManager::processInput(GLFWwindow* window, double deltaTime)
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera->ProcessKeyboard(RIGHT, deltaTime);
     //If I want to stay in ground level (xz plane)
-    //camera->Position.y = 3.0f;
+    //camera->Position.y = 2.0f;
 }
 
 bool InputManager::isKeyPressed(int key) const
