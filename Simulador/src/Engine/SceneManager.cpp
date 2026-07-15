@@ -104,25 +104,35 @@ void SceneManager::loadHouse() {
     houseDoorModels.clear();
 
  
-
     // ============================================================
-     // 1. ESTRUCTURAS FIJAS (Lo que siempre se dibuja 1 vez por casa)
-     // ============================================================
+        // 1. ESTRUCTURAS FIJAS (Se dibujan siempre, 1 vez por casa)
+        // ============================================================
     houseStaticProps.push_back(new Model("Assets/models/Casa/casa.obj"));
+    houseStaticProps.push_back(new Model("Assets/models/Cupboard/cupboard.obj"));
+    houseStaticProps.push_back(new Model("Assets/models/Car/car.obj"));
+    houseStaticProps.push_back(new Model("Assets/models/Refrigerator/refrigerator.obj"));
+    houseStaticProps.push_back(new Model("Assets/models/Table/table.obj"));
 
     // ============================================================
-    // 2. CATÁLOGO DE MOLDES (Solo se guardan en memoria, el TXT los dibuja)
-    // ¡Adiós a originalPositions y a houseStaticProps para los muebles!
+    // 2. CATÁLOGO DE CLONES (Manejados exclusivamente por el TXT)
     // ============================================================
+    modelCatalog.clear();
+    originalPositions.clear();
+
     modelCatalog["Bed"] = new Model("Assets/models/Bed/bed.obj");
-    modelCatalog["Cupboard"] = new Model("Assets/models/Cupboard/cupboard.obj");
-    modelCatalog["Car"] = new Model("Assets/models/Car/car.obj");
+    originalPositions["Bed"] = glm::vec3(261.39f, 3.9184f, 1.4983f);
+
     modelCatalog["Desk"] = new Model("Assets/models/Desk/desk.obj");
-    modelCatalog["Refrigerator"] = new Model("Assets/models/Refrigerator/refrigerator.obj");
+    originalPositions["Desk"] = glm::vec3(264.92f, 3.848f, 3.6209f);
+
     modelCatalog["Shower"] = new Model("Assets/models/Shower/shower.obj");
-    modelCatalog["Table"] = new Model("Assets/models/Table/table.obj");
+    originalPositions["Shower"] = glm::vec3(260.23f, 5.2473f, -4.5696f);
+
     modelCatalog["Toiled"] = new Model("Assets/models/Toiled/toiled.obj");
+    originalPositions["Toiled"] = glm::vec3(262.64f, 3.9414f, -6.8387f);
+
     modelCatalog["Washbasin"] = new Model("Assets/models/Washbasin/washbasin.obj");
+    originalPositions["Washbasin"] = glm::vec3(264.92f, 4.2298f, -5.5872f);
 
     // ============================================================
     // 3. PUERTAS ANIMADAS
@@ -168,12 +178,15 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
     glm::mat4 identityMatrix = glm::mat4(1.0f);
 
     // ============================================================
-    // LÓGICA DE DIBUJADO DE CLONES (ORIGINALES + CLONES)
-    // ============================================================
+     // LÓGICA DE DIBUJADO DE CLONES (Filtra solo lo que está en el catálogo)
+     // ============================================================
     auto DrawAllInstancedProps = [&](glm::vec3 houseOffset) {
         for (const PropInstance& prop : sceneLayout) {
+
+            // FILTRO INTELIGENTE: Si el txt manda "Car", se lo salta porque no está en modelCatalog
             if (modelCatalog.find(prop.name) != modelCatalog.end()) {
                 glm::mat4 cloneMatrix = glm::mat4(1.0f);
+                glm::vec3 posOrig = originalPositions[prop.name];
 
                 // 5. Trasladar al vecindario
                 cloneMatrix = glm::translate(cloneMatrix, houseOffset);
@@ -181,14 +194,14 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
                 // 4. Trasladar a la posición de Blender
                 cloneMatrix = glm::translate(cloneMatrix, prop.pos);
 
-                // 3. ROTACIÓN CORREGIDA: Agregamos el signo '-' por sugerencia de Anderson
+                // 3. Rotar (Con el signo '-' por sugerencia de Anderson)
                 cloneMatrix = glm::rotate(cloneMatrix, glm::radians(-prop.rotY), glm::vec3(0.0f, 1.0f, 0.0f));
 
                 // 2. Escalar
                 cloneMatrix = glm::scale(cloneMatrix, prop.scale);
 
-                // 1. DESHORNEAR (Matemática perfecta gracias a que el txt manda todo)
-                cloneMatrix = glm::translate(cloneMatrix, -prop.origPos);
+                // 1. DESHORNEAR (Matemática perfecta con nuestros valores quemados)
+                cloneMatrix = glm::translate(cloneMatrix, -posOrig);
 
                 mainShader->setMat4("model", cloneMatrix);
                 modelCatalog[prop.name]->Draw(*mainShader);
