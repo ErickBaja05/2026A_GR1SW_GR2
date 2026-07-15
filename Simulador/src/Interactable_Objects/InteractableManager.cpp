@@ -42,13 +42,16 @@ void InteractableManager::createDoorWithTrigger(int id, const glm::vec3& hingePo
     CollisionManager& collisionManager)
 {
     outInteractables.push_back(std::make_unique<Door>(id, hingePosition));
+    float triggerHalfExtentXZ = 1.5f;
+    float triggerHeightMin = -2.5f;
+    float triggerHeightMax = 1.0f;
 
     Trigger trigger;
     trigger.name = "door_trigger_" + std::to_string(id);
     trigger.type = TriggerType::Door;
     trigger.box = BoundingBox{
-        hingePosition - glm::vec3(DOOR_TRIGGER_HALF_EXTENT_XZ, 0.0f, DOOR_TRIGGER_HALF_EXTENT_XZ),
-        hingePosition + glm::vec3(DOOR_TRIGGER_HALF_EXTENT_XZ, DOOR_TRIGGER_HEIGHT, DOOR_TRIGGER_HALF_EXTENT_XZ)
+        hingePosition + glm::vec3(-triggerHalfExtentXZ, triggerHeightMin, -triggerHalfExtentXZ),
+        hingePosition + glm::vec3(triggerHalfExtentXZ, triggerHeightMax, triggerHalfExtentXZ)
     };
     trigger.enabled = true;
     trigger.targetId = id;

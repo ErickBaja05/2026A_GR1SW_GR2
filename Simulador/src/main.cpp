@@ -10,7 +10,7 @@
 #include "Interactable_Objects/InteractableManager.h"
 
 // X: 264 (frente a la casa), Y: 4 (altura), Z: 15 (afuera en la calle)
-Camera camera(glm::vec3(264.0f, 4.0f, 15.0f)); // Iniciamos un poco más arriba para simular la altura de los ojos
+Camera camera(glm::vec3(264.0f, 1.0f, 15.0f)); // Iniciamos un poco más arriba para simular la altura de los ojos
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
@@ -53,8 +53,8 @@ int main() {
     // ==================================================
 
     // 4. Inicializamos Input y Lógica
-    InputManager inputManager(&camera);
     CollisionManager collisionManager;
+    InputManager inputManager(&camera);
     GameLogic gameLogic(&collisionManager, &inputManager, &sceneManager, &lightManager, &camera);
 
     // Configuramos los Callbacks de la ventana para el Input
