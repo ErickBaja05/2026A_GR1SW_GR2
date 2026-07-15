@@ -12,6 +12,13 @@
 #define GLFW_KEY_E 69
 #endif
 
+#ifndef GLFW_KEY_6
+#define GLFW_KEY_6 54
+#endif
+#ifndef GLFW_KEY_7
+#define GLFW_KEY_7 55
+#endif
+
 GameLogic::GameLogic(CollisionManager* collisionManager, InputManager* inputManager, SceneManager* sceneManager, LightManager* lightManager, Camera* camera) {
     this->collisionManager = collisionManager;
     this->inputManager = inputManager;
@@ -23,6 +30,13 @@ GameLogic::GameLogic(CollisionManager* collisionManager, InputManager* inputMana
 
 void GameLogic::update(double deltaTime) {
     if (!camera || !collisionManager || !inputManager) return;
+
+    if (inputManager->isKeyJustPressed(GLFW_KEY_6) && sceneManager) {
+        sceneManager->ciclarTexturaInterior();
+    }
+    if (inputManager->isKeyJustPressed(GLFW_KEY_7) && sceneManager) {
+        sceneManager->ciclarTexturaExterior();
+    }
 
     // 1. Obtener la posición y vector frontal usando los atributos públicos de Camera
     glm::vec3 playerPosition = camera->getCameraPos();
