@@ -23,6 +23,7 @@ int main() {
 
     // 2. Inicializamos Shaders (Solo el de los modelos, adiós Skybox)
     Shader mainShader("Assets/shaders/model.vs", "Assets/shaders/model.fs");
+    Shader lightCubeShader("Assets/shaders/lightcube.vs", "Assets/shaders/lightcube.fs");
 
     // 3. Inicializamos Managers
     LightManager lightManager;
@@ -31,9 +32,10 @@ int main() {
     // === ¡NUEVO! LUZ DE LUNA POTENTE Y EN DIAGONAL ===
     lightManager.setDirectionalLight(glm::vec3(-1.0f, -0.5f, -0.5f), glm::vec3(0.8f, 0.8f, 0.9f));
     // Al instanciar el SceneManager, automáticamente carga la casa (por su nuevo constructor)
-    SceneManager sceneManager(&mainShader, &lightManager, &camera);
+    //SceneManager sceneManager(&mainShader, &lightManager, &camera);
+    SceneManager sceneManager(&mainShader, &lightCubeShader, &lightManager, &camera);
 
-    // ==== CONFIGURACIÓN DE LA LINTERNA DEL JUGADOR ====
+    /* // ==== CONFIGURACIÓN DE LA LINTERNA DEL JUGADOR ====
     FlashLight playerFlashLight;
     playerFlashLight.properties.ambient = glm::vec3(0.05f); // Luz base muy tenue
     playerFlashLight.properties.diffuse = glm::vec3(1.0f, 1.0f, 1.0f); // Blanco puro
@@ -50,7 +52,7 @@ int main() {
 
     // Se la pasamos al LightManager
     lightManager.setFlashLight(&playerFlashLight);
-    // ==================================================
+    // ================================================== */
 
     // 4. Inicializamos Input y Lógica
     InputManager inputManager(&camera);
@@ -77,7 +79,7 @@ int main() {
     glfwSetInputMode(rawWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     // === GAME LOOP ===
     while (!gameWindow.shouldClose()) {
-        // Control del tiempo (DeltaTime)
+        // Control del tiempo (DeltaTime)d
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -89,8 +91,8 @@ int main() {
 
         // ==== ACTUALIZAR LA LINTERNA ====
         // Hacemos que la luz emane desde la cámara y apunte hacia donde miramos
-        playerFlashLight.setPosition(camera.Position);
-        playerFlashLight.direction = camera.Front;
+        //playerFlashLight.setPosition(camera.Position);
+        //playerFlashLight.direction = camera.Front;
         // ================================
 
         // Fase 2: Limpieza de pantalla (Fondo negro para la oscuridad)
