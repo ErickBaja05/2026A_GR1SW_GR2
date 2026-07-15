@@ -11,7 +11,10 @@ SceneManager::SceneManager(Shader* main, Shader* lightCube, LightManager* lm, Ca
     lightCubeShader = lightCube;
     lightManager = lm;
     camera = cam;
-
+    //focoCocina1 = new PointLight();
+    //focoCocina1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
+    //focoCocina1->setPosition(glm::vec3(270.563f, 2.84878f, -5.3348f));
+    //lightManager->addPointLight(focoCocina1);
     setupLightCube(); // Inicializa el cubo en memoria de GPU
     loadHouse();
 }
@@ -42,6 +45,21 @@ void SceneManager::setupLightCube() {
     // Solo pasamos el layout 0 (aPos), coincidiendo con tu b2t4_vertex_lightcube.vs
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+}
+
+
+void SceneManager::updateLights(float time) {
+    // --- LÓGICA PARA EL FOCO ANIMADO ---
+    if (focoCocina1 != nullptr) {
+        float speed2 = 4.5f;
+
+        float r2 = glm::sin(time * speed2 + 1.0f) * 0.5f + 0.5f;
+        float g2 = glm::sin(time * speed2 + 3.0f) * 0.5f + 0.5f;
+        float b2 = glm::sin(time * speed2 + 5.0f) * 0.5f + 0.5f;
+
+        // Actualizamos los datos. El Render loop leerá esto y pintará el cubo
+        focoCocina1->properties.diffuse = glm::vec3(r2, g2, b2);
+    }
 }
 
 void SceneManager::loadHouse() {
@@ -337,6 +355,10 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
             model = glm::scale(model, glm::vec3(0.2f));
 
             lightCubeShader->setMat4("model", model);
+            // ====================================================
+            // NUEVO: Enviamos el color de proyección al shader
+            // ====================================================
+            lightCubeShader->setVec3("lightColor", light->properties.diffuse);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
     }
@@ -376,10 +398,13 @@ void SceneManager::setupHouseLights() {
     focoBed->setPosition(glm::vec3(263.338f, 6.37f, 1.56341f));
     lightManager->addPointLight(focoBed);
 
-    PointLight* focoCocina1 = new PointLight();
-    focoCocina1->setId(HouseInteractableIds::Light_Cocina1);
+   focoCocina1 = new PointLight();
     focoCocina1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCocina1->setPosition(glm::vec3(270.563f, 2.84878f, -5.3348f));
+    // NUEVO: Controlar la distancia de la luz para que se quede en la cocina
+    // Valores recomendados para distancias cortas (ej. un cuarto cerrado)
+    focoCocina1->linear = 0.35f;     // Fuerza a la luz a atenuarse más rápido
+    focoCocina1->quadratic = 0.9f;  // Corta la luz drásticamente en los bordes
     lightManager->addPointLight(focoCocina1);
 
     PointLight* focoCocina2 = new PointLight();
