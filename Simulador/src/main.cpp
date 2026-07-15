@@ -73,10 +73,8 @@ int main() {
     for (auto& obj : interactables) {
         gameLogic.registerInteractable(obj.get());
     }
-
-    // 5. Estado Inicial
-    sceneManager.loadHouse();
-
+    // Esta línea es mágica: Oculta el cursor y lo atrapa infinitamente
+    glfwSetInputMode(rawWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     // === GAME LOOP ===
     while (!gameWindow.shouldClose()) {
         // Control del tiempo (DeltaTime)
