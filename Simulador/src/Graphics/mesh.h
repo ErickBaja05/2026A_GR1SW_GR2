@@ -39,6 +39,7 @@ public:
     vector<Texture>      textures;
     float                opacity; // ¡NUEVO! Guardará el valor 'd' del .mtl
     unsigned int VAO;
+    std::string name;
 
     // constructor
     Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures, float opacity = 1.0f)

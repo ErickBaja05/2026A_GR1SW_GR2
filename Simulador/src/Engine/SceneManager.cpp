@@ -123,6 +123,25 @@ void SceneManager::loadHouse() {
     floorTexture = TextureFromFile("texture_floor.png", "Assets/textures", true);
     stbi_set_flip_vertically_on_load(false);
 
+    // Asegúrate de que estos nombres coincidan con los archivos en tu carpeta Assets/textures
+    stbi_set_flip_vertically_on_load(true);
+
+    // Interiores (Texturas para Mat_ParedInterior)
+    texturasInteriores.push_back(TextureFromFile("originalI.jpg", "Assets/textures", false)); // La original
+    texturasInteriores.push_back(TextureFromFile("concreto_claro.jpg", "Assets/textures", false));
+    texturasInteriores.push_back(TextureFromFile("haya.jpg", "Assets/textures", false));
+    texturasInteriores.push_back(TextureFromFile("tapiz.jpg", "Assets/textures", false));
+    texturasInteriores.push_back(TextureFromFile("ladrillo_blanco.jpg", "Assets/textures", false));
+
+    // Exteriores (Texturas para Mat_ParedExterior)
+    texturasExteriores.push_back(TextureFromFile("originalE.jpg", "Assets/textures", false)); // La original
+    texturasExteriores.push_back(TextureFromFile("concretoExpuesto.jpg", "Assets/textures", false));
+    texturasExteriores.push_back(TextureFromFile("stucoBeige.jpg", "Assets/textures", false));
+    texturasExteriores.push_back(TextureFromFile("aluminio.jpg", "Assets/textures", false));
+    texturasExteriores.push_back(TextureFromFile("maderaOscura.jpg", "Assets/textures", false));
+
+    stbi_set_flip_vertically_on_load(false);
+
     for (Model* prop : houseStaticProps) delete prop;
     houseStaticProps.clear();
 
@@ -573,4 +592,32 @@ void SceneManager::loadLayoutData(const std::string& filepath) {
     }
     file.close();
     std::cout << "Se cargaron " << sceneLayout.size() << " clones desde el TXT con precisión absoluta." << std::endl;
+}
+
+void SceneManager::ciclarTexturaInterior() {
+    if (texturasInteriores.empty() || houseStaticProps.empty()) return;
+
+    indiceTexturaInterior++;
+    if (indiceTexturaInterior >= texturasInteriores.size()) {
+        indiceTexturaInterior = 0;
+    }
+
+    unsigned int nuevaTextura = texturasInteriores[indiceTexturaInterior];
+    houseStaticProps[0]->swapTexture("Mat_ParedInterior", nuevaTextura);
+
+    std::cout << "Interior cambiado a textura #" << indiceTexturaInterior << std::endl;
+}
+
+void SceneManager::ciclarTexturaExterior() {
+    if (texturasExteriores.empty() || houseStaticProps.empty()) return;
+
+    indiceTexturaExterior++;
+    if (indiceTexturaExterior >= texturasExteriores.size()) {
+        indiceTexturaExterior = 0;
+    }
+
+    unsigned int nuevaTextura = texturasExteriores[indiceTexturaExterior];
+    houseStaticProps[0]->swapTexture("Mat_ParedExterior", nuevaTextura);
+
+    std::cout << "Exterior cambiado a textura #" << indiceTexturaExterior << std::endl;
 }
