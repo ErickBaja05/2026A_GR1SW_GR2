@@ -18,6 +18,7 @@ struct PropInstance {
     glm::vec3 pos;
     float rotY;
     glm::vec3 scale;
+    glm::vec3 origPos; // ¡NUEVO! El pivote exacto que nos manda Blender
 };
 
 // Forward declaration

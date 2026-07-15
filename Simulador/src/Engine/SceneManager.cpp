@@ -105,38 +105,28 @@ void SceneManager::loadHouse() {
 
  
 
-    // Modelos estáticos
+    // ============================================================
+     // 1. ESTRUCTURAS FIJAS (Lo que siempre se dibuja 1 vez por casa)
+     // ============================================================
     houseStaticProps.push_back(new Model("Assets/models/Casa/casa.obj"));
-    // 1. Cargamos el modelo y lo atrapamos en nuestra variable
+
+    // ============================================================
+    // 2. CATÁLOGO DE MOLDES (Solo se guardan en memoria, el TXT los dibuja)
+    // ¡Adiós a originalPositions y a houseStaticProps para los muebles!
+    // ============================================================
     modelCatalog["Bed"] = new Model("Assets/models/Bed/bed.obj");
-    originalPositions["Bed"] = glm::vec3(261.39f, 3.9184f, 1.4983f);
-    houseStaticProps.push_back(modelCatalog["Bed"]);
-
-    
-    houseStaticProps.push_back(new Model("Assets/models/Cupboard/cupboard.obj"));
-	houseStaticProps.push_back(new Model("Assets/models/Car/car.obj"));
-   
+    modelCatalog["Cupboard"] = new Model("Assets/models/Cupboard/cupboard.obj");
+    modelCatalog["Car"] = new Model("Assets/models/Car/car.obj");
     modelCatalog["Desk"] = new Model("Assets/models/Desk/desk.obj");
-	originalPositions["Desk"] = glm::vec3(264.92f, 3.848f, 3.6209f);
-    houseStaticProps.push_back(modelCatalog["Desk"]);
-
-
-    houseStaticProps.push_back(new Model("Assets/models/Refrigerator/refrigerator.obj"));
-
+    modelCatalog["Refrigerator"] = new Model("Assets/models/Refrigerator/refrigerator.obj");
     modelCatalog["Shower"] = new Model("Assets/models/Shower/shower.obj");
-    originalPositions["Shower"] = glm::vec3(260.23f, 5.2473f, -4.5696f);
-    houseStaticProps.push_back(modelCatalog["Shower"]);
-
-    houseStaticProps.push_back(new Model("Assets/models/Table/table.obj"));
+    modelCatalog["Table"] = new Model("Assets/models/Table/table.obj");
     modelCatalog["Toiled"] = new Model("Assets/models/Toiled/toiled.obj");
-    originalPositions["Toiled"] = glm::vec3(262.64f, 3.9414f, -6.8387f);
-    houseStaticProps.push_back(modelCatalog["Toiled"]);
-
     modelCatalog["Washbasin"] = new Model("Assets/models/Washbasin/washbasin.obj");
-    originalPositions["Washbasin"] = glm::vec3(264.92f, 4.2298f, -5.5872f);
-    houseStaticProps.push_back(modelCatalog["Washbasin"]);
 
-    // Puertas animadas
+    // ============================================================
+    // 3. PUERTAS ANIMADAS
+    // ============================================================
     houseDoorModels[HouseInteractableIds::Door_CV1_P1] = new Model("Assets/models/P_CV1_p1/pcv1_p1.obj");
     houseDoorModels[HouseInteractableIds::Door_CV2_P1] = new Model("Assets/models/P_CV2_p1/pcv2_p1.obj");
     houseDoorModels[HouseInteractableIds::Door_CV3_P1] = new Model("Assets/models/P_CV3_p1/pcv3_p1.obj");
@@ -158,6 +148,9 @@ void SceneManager::loadHouse() {
     houseDoorModels[HouseInteractableIds::Door_Garage] = new Model("Assets/models/P_Garage/p_garage.obj");
     houseDoorModels[HouseInteractableIds::Door_Principal] = new Model("Assets/models/P_Principal/p_principal.obj");
 
+    // ============================================================
+    // 4. INICIALIZAR LUCES Y CARGAR DECORACIÓN FINAL
+    // ============================================================
     setupHouseLights();
     loadLayoutData("Assets/layout_muebles.txt");
 }
@@ -175,32 +168,27 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
     glm::mat4 identityMatrix = glm::mat4(1.0f);
 
     // ============================================================
-    // LÓGICA DE DIBUJADO DE CLONES (DESHORNEADO AUTOMÁTICO)
+    // LÓGICA DE DIBUJADO DE CLONES (ORIGINALES + CLONES)
     // ============================================================
     auto DrawAllInstancedProps = [&](glm::vec3 houseOffset) {
         for (const PropInstance& prop : sceneLayout) {
-            // Si el nombre del txt existe en nuestro catálogo
             if (modelCatalog.find(prop.name) != modelCatalog.end()) {
                 glm::mat4 cloneMatrix = glm::mat4(1.0f);
-                glm::vec3 posOrig = originalPositions[prop.name];
 
-                // PASO F: Posición en la casa clonada del vecindario
+                // 5. Trasladar al vecindario
                 cloneMatrix = glm::translate(cloneMatrix, houseOffset);
 
-                // PASO E: El "Delta" (La distancia exacta que Anderson movió el objeto)
+                // 4. Trasladar a la posición de Blender
                 cloneMatrix = glm::translate(cloneMatrix, prop.pos);
 
-                // PASO D: ¡EL RE-HORNEADO! (Devolvemos el modelo a su lugar base en la casa)
-                cloneMatrix = glm::translate(cloneMatrix, posOrig);
+                // 3. ROTACIÓN CORREGIDA: Agregamos el signo '-' por sugerencia de Anderson
+                cloneMatrix = glm::rotate(cloneMatrix, glm::radians(-prop.rotY), glm::vec3(0.0f, 1.0f, 0.0f));
 
-                // PASO C: Rotación sobre su propio eje Y
-                cloneMatrix = glm::rotate(cloneMatrix, glm::radians(prop.rotY), glm::vec3(0.0f, 1.0f, 0.0f));
-
-                // PASO B: Escala
+                // 2. Escalar
                 cloneMatrix = glm::scale(cloneMatrix, prop.scale);
 
-                // PASO A: ¡EL DESHORNEADO! (Llevamos el modelo a 0,0,0 para que no rote extraño)
-                cloneMatrix = glm::translate(cloneMatrix, -posOrig);
+                // 1. DESHORNEAR (Matemática perfecta gracias a que el txt manda todo)
+                cloneMatrix = glm::translate(cloneMatrix, -prop.origPos);
 
                 mainShader->setMat4("model", cloneMatrix);
                 modelCatalog[prop.name]->Draw(*mainShader);
@@ -375,31 +363,29 @@ void SceneManager::loadLayoutData(const std::string& filepath) {
         std::string item;
         PropInstance inst;
 
-        // Leer Nombre
+        // 1. Nombre Base (Python ya lo manda limpio, ej. "Bed")
         std::getline(ss, inst.name, ',');
 
-        // --- NUEVO: Limpiador de nombres ---
-        // Borramos cualquier número al final del nombre (ej. "Bed2" -> "Bed")
-        while (!inst.name.empty() && inst.name.back() >= '0' && inst.name.back() <= '9') {
-            inst.name.pop_back();
-        }
-
-        // Leer Posiciones
+        // 2. Posición del Clon
         std::getline(ss, item, ','); inst.pos.x = std::stof(item);
         std::getline(ss, item, ','); inst.pos.y = std::stof(item);
         std::getline(ss, item, ','); inst.pos.z = std::stof(item);
 
-        // Leer Rotación
+        // 3. Rotación
         std::getline(ss, item, ','); inst.rotY = std::stof(item);
 
-        // Leer Escalas
+        // 4. Escala
         std::getline(ss, item, ','); inst.scale.x = std::stof(item);
         std::getline(ss, item, ','); inst.scale.y = std::stof(item);
         std::getline(ss, item, ','); inst.scale.z = std::stof(item);
 
-        // Lo metemos a la lista de dibujo
+        // 5. Pivote Original EXACTO (Extraído de Blender)
+        std::getline(ss, item, ','); inst.origPos.x = std::stof(item);
+        std::getline(ss, item, ','); inst.origPos.y = std::stof(item);
+        std::getline(ss, item, ','); inst.origPos.z = std::stof(item);
+
         sceneLayout.push_back(inst);
     }
     file.close();
-    std::cout << "Se cargaron " << sceneLayout.size() << " clones desde el TXT." << std::endl;
+    std::cout << "Se cargaron " << sceneLayout.size() << " clones desde el TXT con precisión absoluta." << std::endl;
 }
