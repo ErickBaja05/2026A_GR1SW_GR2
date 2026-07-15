@@ -1,5 +1,11 @@
 #include "SceneManager.h"
 #include <iostream>
+#include <stb_image.h> 
+#include "../Lighting/LightManager.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include "../Interactable_Objects/HouseInteractableIds.h" // ajusta el path a tu estructura real
+#include "../Interactable_Objects/Interactable.h" // ajusta el path a tu estructura real
+#include "../Interactable_Objects/Door.h"
 
 
 SceneManager::SceneManager(Shader* main, LightManager* lm, Camera* cam) {
@@ -12,61 +18,91 @@ SceneManager::SceneManager(Shader* main, LightManager* lm, Camera* cam) {
 }
 
 SceneManager::~SceneManager() {
-    for (Model* prop : sceneProps) delete prop;
-    sceneProps.clear();
+    for (Model* prop : neighborhoodProps) delete prop;
+    for (Model* prop : houseStaticProps) delete prop;
+    for (auto& pair : houseDoorModels) delete pair.second;
+}
+
+// Nueva función de control
+void SceneManager::toggleScene() {
+    if (currentState == SceneState::NEIGHBORHOOD) {
+        loadHouse();
+    }
+    else {
+        loadNeighborhood();
+    }
+}
+
+void SceneManager::loadNeighborhood() {
+    std::cout << "[SceneManager] Cargando Vecindario..." << std::endl;
+    for (Model* prop : houseStaticProps) delete prop;
+    houseStaticProps.clear();
+    for (auto& pair : houseDoorModels) delete pair.second;
+    houseDoorModels.clear();
+
+    neighborhoodProps.push_back(new Model("Assets/models/Barrio/barrio.obj"));
+    lightManager->setDirectionalLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(1.0f));
+
+    // Te teletransportamos a la calle (Libre movimiento)
+    //if (camera) camera->Position = glm::vec3(0.0f, 2.0f, 1.0f);
+
+    currentState = SceneState::NEIGHBORHOOD;
 }
 
 void SceneManager::loadHouse() {
-    std::cout << "[SceneManager] Cargando Escena Principal (Casa y Objetos)..." << std::endl;
+    std::cout << "[SceneManager] Entrando a la casa..." << std::endl;
 
-    for (Model* prop : sceneProps) delete prop;
-    sceneProps.clear();
+    for (Model* prop : neighborhoodProps) delete prop;
+    neighborhoodProps.clear();
 
-    // 1. La Casa y Cuartos
-    sceneProps.push_back(new Model("Assets/models/Casa/casa.obj"));
-    sceneProps.push_back(new Model("Assets/models/Bed/bed.obj"));
-    sceneProps.push_back(new Model("Assets/models/Cupboard/cupboard.obj"));
-    sceneProps.push_back(new Model("Assets/models/Desk/desk.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_Bathroom/p_bathroom.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_Bedroom/p_bedroom.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_Cocina/p_cocina.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_CV1_p1/pcv1_p1.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_CV1_p2/pcv1_p2.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_CV2_p1/pcv2_p1.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_CV2_p2/pcv2_p2.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_CV3_p1/pcv3_p1.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_CV3_p2/pcv3_p2.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_CV4_p1/pcv4_p1.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_CV4_p2/pcv4_p2.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_CV5_p1/pcv5_p1.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_CV6_p1/pcv6_p1.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_CV7_p1/pcv7_p1.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_CV8_p1/pcv8_p1.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_CV9_p1/pcv9_p1.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_Garage/p_garage.obj"));
-    sceneProps.push_back(new Model("Assets/models/P_Principal/p_principal.obj"));
-    sceneProps.push_back(new Model("Assets/models/Refrigerator/refrigerator.obj"));
-    sceneProps.push_back(new Model("Assets/models/Shower/shower.obj"));
-    sceneProps.push_back(new Model("Assets/models/Table/table.obj"));
-    sceneProps.push_back(new Model("Assets/models/Toiled/toiled.obj"));
-    sceneProps.push_back(new Model("Assets/models/Washbasin/washbasin.obj"));
+    for (Model* prop : houseStaticProps) delete prop;
+    houseStaticProps.clear();
 
-    // 2. TUS 5 OBJETOS DE SKETCHFAB (Malditos / A recolectar)
-    // Descomenta y pon las rutas reales cuando los tengan
-    // sceneProps.push_back(new Model("Assets/models/SketchfabObj1/obj1.obj"));
-    // sceneProps.push_back(new Model("Assets/models/SketchfabObj2/obj2.obj"));
-    // sceneProps.push_back(new Model("Assets/models/SketchfabObj3/obj3.obj"));
-    // sceneProps.push_back(new Model("Assets/models/SketchfabObj4/obj4.obj"));
-    // sceneProps.push_back(new Model("Assets/models/SketchfabObj5/obj5.obj"));
+    for (auto& pair : houseDoorModels) delete pair.second;
+    houseDoorModels.clear();
 
-    // 3. Luces
+    // Props sin transformación individual (se dibujan con matriz identidad, igual que antes)
+    houseStaticProps.push_back(new Model("Assets/models/Casa/casa.obj"));
+    houseStaticProps.push_back(new Model("Assets/models/Bed/bed.obj"));
+    houseStaticProps.push_back(new Model("Assets/models/Cupboard/cupboard.obj"));
+    houseStaticProps.push_back(new Model("Assets/models/Desk/desk.obj"));
+    houseStaticProps.push_back(new Model("Assets/models/Refrigerator/refrigerator.obj"));
+    houseStaticProps.push_back(new Model("Assets/models/Shower/shower.obj"));
+    houseStaticProps.push_back(new Model("Assets/models/Table/table.obj"));
+    houseStaticProps.push_back(new Model("Assets/models/Toiled/toiled.obj"));
+    houseStaticProps.push_back(new Model("Assets/models/Washbasin/washbasin.obj"));
+
+    // Puertas: mismo id que usó InteractableManager al crear su Door/Trigger (ver HouseInteractableIds.h)
+    houseDoorModels[HouseInteractableIds::Door_CV1_P1] = new Model("Assets/models/P_CV1_p1/pcv1_p1.obj");
+    houseDoorModels[HouseInteractableIds::Door_CV2_P1] = new Model("Assets/models/P_CV2_p1/pcv2_p1.obj");
+    houseDoorModels[HouseInteractableIds::Door_CV3_P1] = new Model("Assets/models/P_CV3_p1/pcv3_p1.obj");
+    houseDoorModels[HouseInteractableIds::Door_CV4_P1] = new Model("Assets/models/P_CV4_p1/pcv4_p1.obj");
+    houseDoorModels[HouseInteractableIds::Door_CV5_P1] = new Model("Assets/models/P_CV5_p1/pcv5_p1.obj");
+    houseDoorModels[HouseInteractableIds::Door_CV6_P1] = new Model("Assets/models/P_CV6_p1/pcv6_p1.obj");
+    houseDoorModels[HouseInteractableIds::Door_CV7_P1] = new Model("Assets/models/P_CV7_p1/pcv7_p1.obj");
+    houseDoorModels[HouseInteractableIds::Door_CV8_P1] = new Model("Assets/models/P_CV8_p1/pcv8_p1.obj");
+    houseDoorModels[HouseInteractableIds::Door_CV9_P1] = new Model("Assets/models/P_CV9_p1/pcv9_p1.obj");
+
+    houseDoorModels[HouseInteractableIds::Door_CV1_P2] = new Model("Assets/models/P_CV1_p2/pcv1_p2.obj");
+    houseDoorModels[HouseInteractableIds::Door_CV2_P2] = new Model("Assets/models/P_CV2_p2/pcv2_p2.obj");
+    houseDoorModels[HouseInteractableIds::Door_CV3_P2] = new Model("Assets/models/P_CV3_p2/pcv3_p2.obj");
+    houseDoorModels[HouseInteractableIds::Door_CV4_P2] = new Model("Assets/models/P_CV4_p2/pcv4_p2.obj");
+
+    houseDoorModels[HouseInteractableIds::Door_Bathroom] = new Model("Assets/models/P_Bathroom/p_bathroom.obj");
+    houseDoorModels[HouseInteractableIds::Door_Bedroom] = new Model("Assets/models/P_Bedroom/p_bedroom.obj");
+    houseDoorModels[HouseInteractableIds::Door_Cocina] = new Model("Assets/models/P_Cocina/p_cocina.obj");
+    houseDoorModels[HouseInteractableIds::Door_Garage] = new Model("Assets/models/P_Garage/p_garage.obj");
+    houseDoorModels[HouseInteractableIds::Door_Principal] = new Model("Assets/models/P_Principal/p_principal.obj");
+
     setupHouseLights();
 
-    // 4. Posición Inicial
-    if (camera) camera->Position = glm::vec3(264.0f, 3.0f, -2.0f);
+    // Te teletransportamos adentro de la casa (A la coordenada X:264)
+    //if (camera) camera->Position = glm::vec3(264.0f, 3.0f, -2.0f);
+
+    currentState = SceneState::INSIDE_HOUSE;
 }
 
-void SceneManager::render(glm::mat4 view, glm::mat4 projection) {
+void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vector<Interactable*>& interactables) {
     mainShader->use();
     mainShader->setMat4("projection", projection);
     mainShader->setMat4("view", view);
@@ -76,30 +112,68 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection) {
 
     lightManager->sendLightsToShader(*mainShader);
 
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    mainShader->setMat4("model", modelMatrix);
+    if (currentState == SceneState::NEIGHBORHOOD) {
+        glm::mat4 modelMatrix = glm::mat4(1.0f);
+        mainShader->setMat4("model", modelMatrix);
+        for (Model* prop : neighborhoodProps) prop->Draw(*mainShader);
+        // ¡Cero Skybox aquí!
+    }
+    else if (currentState == SceneState::INSIDE_HOUSE) {
+        // Props sin transformación individual: misma matriz identidad para todos, como antes
+        glm::mat4 identityMatrix = glm::mat4(1.0f);
+        mainShader->setMat4("model", identityMatrix);
+        for (Model* prop : houseStaticProps) prop->Draw(*mainShader);
 
-    // Activamos la transparencia (Blender/Vidrio)
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        // Puertas: cada una con su propia matriz según su rotación actual
+        renderDoors(interactables);
 
-    for (Model* prop : sceneProps) {
-        prop->Draw(*mainShader);
+        // El Skybox ahora solo se dibuja SI estamos dentro de la casa
+        glDepthFunc(GL_LEQUAL);
+        skyboxShader->use();
+        glm::mat4 skyView = glm::mat4(glm::mat3(view));
+        skyboxShader->setMat4("view", skyView);
+        skyboxShader->setMat4("projection", projection);
+
+        glBindVertexArray(skyboxVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(0);
+        glDepthFunc(GL_LESS);
     }
 
     glDisable(GL_BLEND);
 }
 
-void SceneManager::setupHouseLights() {
-    // Exactamente el mismo código que me enviaste con los 15 PointLights.
-    // Solo pégalo aquí adentro tal cual estaba.
-    PointLight* focoBath = new PointLight();
-    focoBath->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
-    focoBath->setPosition(glm::vec3(262.692f, 6.29839f, -5.6183f));
-    lightManager->addPointLight(focoBath);
+void SceneManager::renderDoors(const std::vector<Interactable*>& interactables) {
+    // mainShader ya está activo y projection/view ya fueron seteados por render().
+    for (Interactable* obj : interactables) {
+        if (!obj || obj->getType() != InteractableType::Door) {
+            continue;
+        }
 
-    // ... Pega el resto de los PointLights de tu código original ...
+        auto it = houseDoorModels.find(obj->getId());
+        if (it == houseDoorModels.end()) {
+            // No hay modelo cargado para este id. No debería pasar si los ids
+            // en HouseInteractableIds.h calzan con InteractableManager y loadHouse().
+            continue;
+        }
+
+        Door* door = static_cast<Door*>(obj);
+
+        // El modelo fue exportado con el pivote en la bisagra (vértices locales
+        // relativos a ella), así que basta con trasladar a esa posición y rotar
+        // sobre Y — no hace falta ningún offset adicional.
+        glm::mat4 modelMatrix = glm::mat4(1.0f);
+        modelMatrix = glm::translate(modelMatrix, door->getPosition());
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(door->getRotationY()), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        mainShader->setMat4("model", modelMatrix);
+        it->second->Draw(*mainShader);
+    }
 }
+
+// ... EL RESTO DE TUS FUNCIONES (setupHouseLights, setupSkybox, loadCubemap) QUEDAN EXACTAMENTE IGUAL A TU CÓDIGO ...
 
 
 void SceneManager::setupHouseLights() {

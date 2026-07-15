@@ -1,11 +1,14 @@
 #pragma once
 
+#include <vector>
+
 // Forward declarations para evitar inclusiones circulares y acelerar la compilación
 class CollisionManager;
 class InputManager;
 class SceneManager;
 class LightManager;
 class Camera;
+class Interactable;
 struct Trigger;
 
 /**
@@ -24,8 +27,23 @@ public:
     /**
      * Método principal de actualización de la lógica. Debe ser llamado en cada frame.
      * Realiza el flujo de control: posición -> colisión -> entrada -> interacción.
+     * @param deltaTime Tiempo transcurrido desde el frame anterior, requerido para
+     * que los Interactable (ej. Door) puedan animarse correctamente.
      */
-    void update();
+    void update(double deltaTime);
+
+    /**
+     * Registra un objeto interactivo para que GameLogic pueda encontrarlo por id
+     * cuando un Trigger lo referencie, y para que reciba update() cada frame.
+     */
+    void registerInteractable(Interactable* interactable);
+
+    /**
+     * Expone los interactables registrados para que SceneManager pueda consultar
+     * su posición/rotación al renderizar (ej. puertas). GameLogic sigue siendo
+     * el dueño de esta lista (no-owning para quien la lee).
+     */
+    const std::vector<Interactable*>& getInteractables() const { return interactables; }
 
 private:
     // Punteros a las dependencias externas
@@ -41,27 +59,12 @@ private:
     // Código de la tecla configurada para interactuar (por ejemplo, GLFW_KEY_E)
     int interactionKey;
 
-    /**
-     * Enruta el trigger detectado hacia su respectivo manejador según su tipo.
-     * @param trigger Puntero constante al trigger con el que se está interactuando.
-     */
-    void processInteraction(const Trigger* trigger);
+    // Objetos interactivos registrados (Door, LightSwitch, ...). No-owning.
+    std::vector<Interactable*> interactables;
 
     /**
-     * Gestiona la interacción con triggers de tipo Door (Puertas).
-     * @param trigger Puntero constante al trigger de la puerta.
+     * Busca un Interactable registrado cuyo id coincida con targetId.
+     * @return puntero al Interactable encontrado, o nullptr si no existe.
      */
-    void handleDoor(const Trigger* trigger);
-
-    /**
-     * Gestiona la interacción con triggers de tipo LightSwitch (Interruptores).
-     * @param trigger Puntero constante al trigger del interruptor.
-     */
-    void handleLightSwitch(const Trigger* trigger);
-
-    /**
-     * Gestiona la interacción con triggers de tipo TextureChanger (Cambio de textura).
-     * @param trigger Puntero constante al trigger del cambiador de textura.
-     */
-    void handleTextureChanger(const Trigger* trigger);
+    Interactable* findInteractable(int targetId) const;
 };

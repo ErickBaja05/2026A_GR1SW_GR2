@@ -6,10 +6,10 @@
 #include "Input/InputManager.h" 
 #include "Input/CollisionManager.h"
 #include "Input/GameLogic.h"
+#include "Interactable_Objects/Interactable.h"
+#include "Interactable_Objects/InteractableManager.h"
 
-// Iniciamos la cámara un poco más arriba para simular la altura de los ojos 
-// y en la posición inicial dentro de la casa.
-Camera camera(glm::vec3(264.0f, 3.0f, -2.0f));
+Camera camera(glm::vec3(260.0f, 3.0f, 20.0f)); // Iniciamos un poco más arriba para simular la altura de los ojos
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
@@ -19,8 +19,6 @@ int main() {
 
     // Configuraciones globales de OpenGL
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // 2. Inicializamos Shaders (Solo el de los modelos, adiós Skybox)
     Shader mainShader("Assets/shaders/model.vs", "Assets/shaders/model.fs");
@@ -66,8 +64,13 @@ int main() {
         static_cast<InputManager*>(glfwGetWindowUserPointer(w))->scroll_callback(w, x, y);
         });
 
-    // Ocultar y capturar el cursor del ratón
-    glfwSetInputMode(rawWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    auto interactables = InteractableManager::createHouseInteractables(collisionManager);
+    for (auto& obj : interactables) {
+        gameLogic.registerInteractable(obj.get());
+    }
+
+    // 5. Estado Inicial
+    sceneManager.loadHouse();
 
     // === GAME LOOP ===
     while (!gameWindow.shouldClose()) {
@@ -78,7 +81,8 @@ int main() {
 
         // Fase 1: Input y Lógica
         inputManager.processInput(rawWindow, deltaTime);
-        gameLogic.update();
+
+        gameLogic.update(deltaTime);
 
         // ==== ACTUALIZAR LA LINTERNA ====
         // Hacemos que la luz emane desde la cámara y apunte hacia donde miramos
@@ -94,8 +98,8 @@ int main() {
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), 1024.0f / 768.0f, 0.1f, 5000.0f);
         glm::mat4 view = camera.GetViewMatrix();
 
-        // Fase 4: Renderizado de la Escena
-        sceneManager.render(view, projection);
+        // Fase 4: Renderizado Maestro
+        sceneManager.render(view, projection, gameLogic.getInteractables());
 
         // Fase 5: Intercambio de Buffers (VSync) y Eventos
         gameWindow.swapBuffers();
