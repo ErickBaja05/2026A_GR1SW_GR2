@@ -48,6 +48,8 @@ private:
 public:
     LightManager() : playerFlashLight(nullptr) {} // Constructor seguro
     
+    // NUEVO: Permite al SceneManager leer las luces para dibujarlas
+    const std::vector<PointLight*>& getPointLights() const { return pointLights; }
     void setDirectionalLight(glm::vec3 dir, glm::vec3 color);
     void addPointLight(PointLight* light);
     void setFlashLight(FlashLight* light);
