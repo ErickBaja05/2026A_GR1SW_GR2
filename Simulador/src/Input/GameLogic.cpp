@@ -12,6 +12,13 @@
 #define GLFW_KEY_E 69
 #endif
 
+#ifndef GLFW_KEY_6
+#define GLFW_KEY_6 54
+#endif
+#ifndef GLFW_KEY_7
+#define GLFW_KEY_7 55
+#endif
+
 GameLogic::GameLogic(CollisionManager* collisionManager, InputManager* inputManager, SceneManager* sceneManager, LightManager* lightManager, Camera* camera) {
     this->collisionManager = collisionManager;
     this->inputManager = inputManager;
@@ -24,28 +31,36 @@ GameLogic::GameLogic(CollisionManager* collisionManager, InputManager* inputMana
 void GameLogic::update(double deltaTime) {
     if (!camera || !collisionManager || !inputManager) return;
 
+    if (inputManager->isKeyJustPressed(GLFW_KEY_6) && sceneManager) {
+        sceneManager->ciclarTexturaInterior();
+    }
+    if (inputManager->isKeyJustPressed(GLFW_KEY_7) && sceneManager) {
+        sceneManager->ciclarTexturaExterior();
+    }
+
     // 1. Obtener la posición y vector frontal usando los atributos públicos de Camera
-    glm::vec3 playerPosition = camera->Position;
-    glm::vec3 playerForward = camera->Front;
+    glm::vec3 playerPosition = camera->getCameraPos();
+    glm::vec3 playerForward = camera->getCameraFront();
 
     // 2. Consultar Trigger activo
     const Trigger* activeTrigger = collisionManager->checkCollision(playerPosition, playerForward);
 
-    // 3. ¡MUY IMPORTANTE! Llamar a isKeyJustPressed SIEMPRE para que el InputManager se actualice
+    // 3. Llamar a isKeyJustPressed SIEMPRE para que el InputManager se actualice
     bool ePressed = inputManager->isKeyJustPressed(interactionKey);
-
+    
     // 4. Evaluar interacción
     if (activeTrigger && ePressed) {
         std::cout << "Interactuando en zona ID: " << activeTrigger->targetId << "\n";
-        Interactable* target = findInteractable(activeTrigger->targetId);
 
-        if (target && target->isEnabled()) {
-            target->interact();
-
-            // Lógica específica para focos
-            if (target->getType() == InteractableType::LightSwitch && lightManager) {
-                LightSwitch* lightSwitch = static_cast<LightSwitch*>(target);
-                lightManager->togglePointLight(lightSwitch->getId(), lightSwitch->getIsOn());
+        if (activeTrigger->type == TriggerType::LightSwitch && lightManager) {
+            std::cout << "Hola\n";
+            lightManager->togglePointLight(activeTrigger->targetId);
+        }
+        else {
+            // Para otros objetos físicos e interactuables (como las puertas)
+            Interactable* target = findInteractable(activeTrigger->targetId);
+            if (target && target->isEnabled()) {
+                target->interact();
             }
         }
     }

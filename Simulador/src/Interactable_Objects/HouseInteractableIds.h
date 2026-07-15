@@ -42,3 +42,26 @@ namespace HouseInteractableIds
     // constexpr int LightSwitch_Bedroom  = 101;
     // ...
 }
+
+namespace HouseInteractableIds {
+    // ... (Tus IDs de puertas existentes) ...
+
+    // IDs de Luces (puedes empezar desde 100 para no chocar con las puertas)
+    inline constexpr int Light_Bath = 101;
+    inline constexpr int Light_Bed = 102;
+    inline constexpr int Light_Cocina1 = 103;
+    inline constexpr int Light_Cocina2 = 104;
+    inline constexpr int Light_CV1_P1 = 105;
+    inline constexpr int Light_CV2_P1 = 106;
+    inline constexpr int Light_CV3_P1 = 107;
+    inline constexpr int Light_CV4_P1 = 108;
+    inline constexpr int Light_CV5_P1 = 109;
+    inline constexpr int Light_CV6_P1 = 110;
+    inline constexpr int Light_CV8_P1 = 111;
+    inline constexpr int Light_CV9_P1 = 112;
+    inline constexpr int Light_Garage = 113;
+    inline constexpr int Light_CV1_P2 = 114;
+    inline constexpr int Light_CV2_P2 = 115;
+    inline constexpr int Light_CV3_P3 = 116;
+    inline constexpr int Light_CV4_P2 = 117;
+}
