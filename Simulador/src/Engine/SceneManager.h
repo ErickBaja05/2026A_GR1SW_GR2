@@ -9,6 +9,16 @@
 #include "../Scene/camera.h"
 #include "../Lighting/LightManager.h"
 #include <stb_image.h>
+#include <fstream>
+#include <sstream>
+
+// Estructura para guardar las instrucciones de cada clon
+struct PropInstance {
+    std::string name;
+    glm::vec3 pos;
+    float rotY;
+    glm::vec3 scale;
+};
 
 // Forward declaration
 class Interactable;
@@ -35,6 +45,18 @@ private:
     std::vector<glm::vec3> vecindarioOffsets;
     // Guardaremos la cantidad total de vértices del súper-piso
     int totalFloorVertices;
+
+    // Catálogo de modelos base (para no cargar el mismo .obj dos veces)
+    std::unordered_map<std::string, Model*> modelCatalog;
+
+    // Aquí guardamos el centro original de cada modelo para "deshornearlo"
+    std::unordered_map<std::string, glm::vec3> originalPositions;
+
+    // La lista de todos los muebles extraídos del .txt
+    std::vector<PropInstance> sceneLayout;
+
+    // Función para leer el txt
+    void loadLayoutData(const std::string& filepath);
 
     void setupHouseLights();
     void renderDoors(const std::vector<Interactable*>& interactables, glm::vec3 houseOffset);

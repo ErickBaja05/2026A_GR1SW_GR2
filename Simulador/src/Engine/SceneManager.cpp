@@ -108,15 +108,33 @@ void SceneManager::loadHouse() {
     // Modelos estáticos
     houseStaticProps.push_back(new Model("Assets/models/Casa/casa.obj"));
     // 1. Cargamos el modelo y lo atrapamos en nuestra variable
-    bedModel = new Model("Assets/models/Bed/bed.obj");
-    houseStaticProps.push_back(bedModel);
+    modelCatalog["Bed"] = new Model("Assets/models/Bed/bed.obj");
+    originalPositions["Bed"] = glm::vec3(261.39f, 3.9184f, 1.4983f);
+    houseStaticProps.push_back(modelCatalog["Bed"]);
+
+    
     houseStaticProps.push_back(new Model("Assets/models/Cupboard/cupboard.obj"));
-    houseStaticProps.push_back(new Model("Assets/models/Desk/desk.obj"));
+	houseStaticProps.push_back(new Model("Assets/models/Car/car.obj"));
+   
+    modelCatalog["Desk"] = new Model("Assets/models/Desk/desk.obj");
+	originalPositions["Desk"] = glm::vec3(264.92f, 3.848f, 3.6209f);
+    houseStaticProps.push_back(modelCatalog["Desk"]);
+
+
     houseStaticProps.push_back(new Model("Assets/models/Refrigerator/refrigerator.obj"));
-    houseStaticProps.push_back(new Model("Assets/models/Shower/shower.obj"));
+
+    modelCatalog["Shower"] = new Model("Assets/models/Shower/shower.obj");
+    originalPositions["Shower"] = glm::vec3(260.23f, 5.2473f, -4.5696f);
+    houseStaticProps.push_back(modelCatalog["Shower"]);
+
     houseStaticProps.push_back(new Model("Assets/models/Table/table.obj"));
-    houseStaticProps.push_back(new Model("Assets/models/Toiled/toiled.obj"));
-    houseStaticProps.push_back(new Model("Assets/models/Washbasin/washbasin.obj"));
+    modelCatalog["Toiled"] = new Model("Assets/models/Toiled/toiled.obj");
+    originalPositions["Toiled"] = glm::vec3(262.64f, 3.9414f, -6.8387f);
+    houseStaticProps.push_back(modelCatalog["Toiled"]);
+
+    modelCatalog["Washbasin"] = new Model("Assets/models/Washbasin/washbasin.obj");
+    originalPositions["Washbasin"] = glm::vec3(264.92f, 4.2298f, -5.5872f);
+    houseStaticProps.push_back(modelCatalog["Washbasin"]);
 
     // Puertas animadas
     houseDoorModels[HouseInteractableIds::Door_CV1_P1] = new Model("Assets/models/P_CV1_p1/pcv1_p1.obj");
@@ -141,6 +159,7 @@ void SceneManager::loadHouse() {
     houseDoorModels[HouseInteractableIds::Door_Principal] = new Model("Assets/models/P_Principal/p_principal.obj");
 
     setupHouseLights();
+    loadLayoutData("Assets/layout_muebles.txt");
 }
 
 void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vector<Interactable*>& interactables) {
@@ -153,14 +172,50 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
     mainShader->setVec3("flashLight.position", camera->Position);
     mainShader->setVec3("flashLight.direction", camera->Front);
 
+    glm::mat4 identityMatrix = glm::mat4(1.0f);
+
     // ============================================================
-    // PASADA 1: RENDEREAR SOLO LO OPACO
+    // LÓGICA DE DIBUJADO DE CLONES (DESHORNEADO AUTOMÁTICO)
     // ============================================================
+    auto DrawAllInstancedProps = [&](glm::vec3 houseOffset) {
+        for (const PropInstance& prop : sceneLayout) {
+            // Si el nombre del txt existe en nuestro catálogo
+            if (modelCatalog.find(prop.name) != modelCatalog.end()) {
+                glm::mat4 cloneMatrix = glm::mat4(1.0f);
+                glm::vec3 posOrig = originalPositions[prop.name];
+
+                // PASO F: Posición en la casa clonada del vecindario
+                cloneMatrix = glm::translate(cloneMatrix, houseOffset);
+
+                // PASO E: El "Delta" (La distancia exacta que Anderson movió el objeto)
+                cloneMatrix = glm::translate(cloneMatrix, prop.pos);
+
+                // PASO D: ¡EL RE-HORNEADO! (Devolvemos el modelo a su lugar base en la casa)
+                cloneMatrix = glm::translate(cloneMatrix, posOrig);
+
+                // PASO C: Rotación sobre su propio eje Y
+                cloneMatrix = glm::rotate(cloneMatrix, glm::radians(prop.rotY), glm::vec3(0.0f, 1.0f, 0.0f));
+
+                // PASO B: Escala
+                cloneMatrix = glm::scale(cloneMatrix, prop.scale);
+
+                // PASO A: ¡EL DESHORNEADO! (Llevamos el modelo a 0,0,0 para que no rote extraño)
+                cloneMatrix = glm::translate(cloneMatrix, -posOrig);
+
+                mainShader->setMat4("model", cloneMatrix);
+                modelCatalog[prop.name]->Draw(*mainShader);
+            }
+        }
+        };
+
+    // ============================================================
+     // PASADA 1: RENDEREAR SOLO LO OPACO
+     // ============================================================
     mainShader->setBool("isTransparentPass", false);
     glDisable(GL_BLEND);
     glDepthMask(GL_TRUE);
 
-    // --- 1. DIBUJAR SÚPER PISO (1 Draw Call) ---
+    // --- 1. DIBUJAR SÚPER PISO ---
     glVertexAttrib3f(1, 0.0f, 1.0f, 0.0f);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, floorTexture);
@@ -171,8 +226,7 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
     glDrawArrays(GL_TRIANGLES, 0, totalFloorVertices);
     glBindVertexArray(0);
 
-    // --- 2. DIBUJAR VECINDARIO (OPTIMIZACIÓN DE CAMBIO DE ESTADO) ---
-    // Invertimos los bucles: Iteramos por modelo, y luego lo pintamos en todas las posiciones
+    // --- 2. DIBUJAR VECINDARIO (ESTRUCTURAS FIJAS) ---
     for (Model* prop : houseStaticProps) {
         for (glm::vec3 offset : vecindarioOffsets) {
             glm::mat4 houseMatrix = glm::translate(glm::mat4(1.0f), offset);
@@ -181,8 +235,9 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
         }
     }
 
-    // Puertas
+    // --- 3. DIBUJAR CLONES DE BLENDER Y PUERTAS ---
     for (glm::vec3 offset : vecindarioOffsets) {
+        DrawAllInstancedProps(offset); // ¡Se llama 1 SOLA VEZ por cada casa!
         renderDoors(interactables, offset);
     }
 
@@ -194,9 +249,7 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(GL_FALSE);
 
-    // --- OPTIMIZACIÓN EXTREMA: SOLO ESTRUCTURA ---
-    // Como solo la "casa.obj" tiene ventanas, evitamos dibujar camas y roperos en la pasada transparente.
-    // Sabemos que la casa principal es el índice 0 en tu arreglo.
+    // Dibuja solo la estructura de las casas (que tienen ventanas de vidrio)
     if (!houseStaticProps.empty()) {
         Model* casaPrincipal = houseStaticProps[0];
         for (glm::vec3 offset : vecindarioOffsets) {
@@ -206,12 +259,13 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
         }
     }
 
-    // Las puertas sí tienen vidrio, así que deben ir en esta pasada
+    // Dibujamos las puertas transparentes
     for (glm::vec3 offset : vecindarioOffsets) {
+        // Omitimos DrawAllInstancedProps aquí porque los inodoros y camas no tienen vidrios
+        // Eso ahorra muchísimo rendimiento.
         renderDoors(interactables, offset);
     }
 
-    // Restaurar los estados por defecto
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
 }
@@ -306,4 +360,46 @@ void SceneManager::setupHouseLights() {
     PointLight* focoCV4P2 = new PointLight();
     focoCV4P2->setPosition(glm::vec3(266.564f, 6.33819f, -4.96717f));
     lightManager->addPointLight(focoCV4P2);
+}
+
+void SceneManager::loadLayoutData(const std::string& filepath) {
+    std::ifstream file(filepath);
+    if (!file.is_open()) {
+        std::cout << "ERROR: No se encontro el archivo " << filepath << std::endl;
+        return;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string item;
+        PropInstance inst;
+
+        // Leer Nombre
+        std::getline(ss, inst.name, ',');
+
+        // --- NUEVO: Limpiador de nombres ---
+        // Borramos cualquier número al final del nombre (ej. "Bed2" -> "Bed")
+        while (!inst.name.empty() && inst.name.back() >= '0' && inst.name.back() <= '9') {
+            inst.name.pop_back();
+        }
+
+        // Leer Posiciones
+        std::getline(ss, item, ','); inst.pos.x = std::stof(item);
+        std::getline(ss, item, ','); inst.pos.y = std::stof(item);
+        std::getline(ss, item, ','); inst.pos.z = std::stof(item);
+
+        // Leer Rotación
+        std::getline(ss, item, ','); inst.rotY = std::stof(item);
+
+        // Leer Escalas
+        std::getline(ss, item, ','); inst.scale.x = std::stof(item);
+        std::getline(ss, item, ','); inst.scale.y = std::stof(item);
+        std::getline(ss, item, ','); inst.scale.z = std::stof(item);
+
+        // Lo metemos a la lista de dibujo
+        sceneLayout.push_back(inst);
+    }
+    file.close();
+    std::cout << "Se cargaron " << sceneLayout.size() << " clones desde el TXT." << std::endl;
 }
