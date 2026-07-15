@@ -37,16 +37,17 @@ public:
     vector<Vertex>       vertices;
     vector<unsigned int> indices;
     vector<Texture>      textures;
+    float                opacity; // ¡NUEVO! Guardará el valor 'd' del .mtl
     unsigned int VAO;
 
     // constructor
-    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures)
+    Mesh(vector<Vertex> vertices, vector<unsigned int> indices, vector<Texture> textures, float opacity = 1.0f)
     {
         this->vertices = vertices;
         this->indices = indices;
         this->textures = textures;
+        this->opacity = opacity; // Asignamos
 
-        // now that we have all the required data, set the vertex buffers and its attribute pointers.
         setupMesh();
     }
 
@@ -78,6 +79,14 @@ public:
             // and finally bind the texture
             glBindTexture(GL_TEXTURE_2D, textures[i].id);
         }
+
+        if (textures.size() == 0) {
+            // Limpiamos la memoria si el vidrio no tiene imagen .png
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+
+        // ¡NUEVO! Enviamos la opacidad leída del .mtl al Shader
+        glUniform1f(glGetUniformLocation(shader.ID, "materialOpacity"), opacity);
         
         // draw mesh
         glBindVertexArray(VAO);

@@ -5,6 +5,25 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+// Función de utilidad para la lógica de materiales sin textura
+unsigned int TextureFromColor(float r, float g, float b, float a) {
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    unsigned char data[4] = {
+        static_cast<unsigned char>(r * 255.0f),
+        static_cast<unsigned char>(g * 255.0f),
+        static_cast<unsigned char>(b * 255.0f),
+        static_cast<unsigned char>(a * 255.0f)
+    };
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    return textureID;
+}
+
 // ==========================================
 // IMPLEMENTACIÓN DE MÉTODOS DE LA CLASE MODEL
 // ==========================================
@@ -125,6 +144,23 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 
     // 1. Diffuse maps
     vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+    // =========================================================
+    // LÓGICA DEL COMPAÑERO: Si no hay textura, crear una de 1x1 
+    // extrayendo los colores (Kd) y opacidad (d) del .mtl
+    // =========================================================
+    if (diffuseMaps.empty()) {
+        aiColor3D color(0.8f, 0.8f, 0.8f);
+        material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+
+        float opacity = 1.0f;
+        material->Get(AI_MATKEY_OPACITY, opacity);
+
+        Texture tex;
+        tex.id = TextureFromColor(color.r, color.g, color.b, opacity);
+        tex.type = "texture_diffuse";
+        tex.path = "color_" + to_string(color.r) + "_" + to_string(opacity);
+        diffuseMaps.push_back(tex);
+    }
     textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
     // 2. Specular maps
@@ -138,6 +174,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     // 4. Height maps
     vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+
+    // ¡NUEVO! Leemos el valor 'd' o 'Tr' del archivo .mtl de Anderson
+    float opacity = 1.0f; // Por defecto es 100% sólido
+    if (material->Get(AI_MATKEY_OPACITY, opacity) != AI_SUCCESS) {
+        opacity = 1.0f;
+    }
 
     return Mesh(vertices, indices, textures);
 }
@@ -183,7 +225,7 @@ unsigned int TextureFromFile(const char* path, const string& directory, bool gam
     glGenTextures(1, &textureID);
 
     int width, height, nrComponents;
-    
+
     unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
 
     if (data)
@@ -194,8 +236,13 @@ unsigned int TextureFromFile(const char* path, const string& directory, bool gam
         // 2. Evaluamos los componentes incluyendo el caso de 2 canales (GL_RG)
         if (nrComponents == 1)
             format = GL_RED;
-        else if (nrComponents == 2)
-            format = GL_RG;
+        else if (nrComponents == 2) {
+            // CORRECCIÓN DEL COMPAÑERO: Liberamos y forzamos a cargar en 4 canales (RGBA)
+            stbi_image_free(data);
+            // ¡AQUÍ ESTÁ LA CORRECCIÓN! Usamos filename en lugar de finalPath
+            data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 4);
+            format = GL_RGBA;
+        }
         else if (nrComponents == 3)
             format = GL_RGB;
         else if (nrComponents == 4)
