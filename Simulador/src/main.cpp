@@ -34,8 +34,7 @@ int main() {
     // Al instanciar el SceneManager, automáticamente carga la casa (por su nuevo constructor)
     //SceneManager sceneManager(&mainShader, &lightManager, &camera);
     SceneManager sceneManager(&mainShader, &lightCubeShader, &lightManager, &camera);
-
-    /* // ==== CONFIGURACIÓN DE LA LINTERNA DEL JUGADOR ====
+ // ==== CONFIGURACIÓN DE LA LINTERNA DEL JUGADOR ====
     FlashLight playerFlashLight;
     playerFlashLight.properties.ambient = glm::vec3(0.05f); // Luz base muy tenue
     playerFlashLight.properties.diffuse = glm::vec3(1.0f, 1.0f, 1.0f); // Blanco puro
@@ -52,7 +51,7 @@ int main() {
 
     // Se la pasamos al LightManager
     lightManager.setFlashLight(&playerFlashLight);
-    // ================================================== */
+    // ================================================== 
 
     // 4. Inicializamos Input y Lógica
     CollisionManager collisionManager;
@@ -91,8 +90,8 @@ int main() {
 
         // ==== ACTUALIZAR LA LINTERNA ====
         // Hacemos que la luz emane desde la cámara y apunte hacia donde miramos
-        //playerFlashLight.setPosition(camera.Position);
-        //playerFlashLight.direction = camera.Front;
+        playerFlashLight.setPosition(camera.Position);
+        playerFlashLight.direction = camera.Front;
         // ================================
         // === ACTUALIZAR LUCES DINÁMICAS EFECTO DISCOTECA ===
         sceneManager.updateLights(currentFrame);
@@ -170,7 +169,7 @@ int main() {
 
         // --- DIBUJAR LA LUNA / SOL ---
         // Le pasamos la posición dinámica que calculaste al inicio del loop
-        //sceneManager.renderMoon(view, projection, dynamicLightPos);
+       
         sceneManager.renderMoon(view, projection, posLuna);
         // Fase 5: Intercambio de Buffers (VSync) y Eventos
         gameWindow.swapBuffers();
