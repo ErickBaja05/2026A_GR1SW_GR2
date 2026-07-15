@@ -36,6 +36,7 @@ public:
 
     std::vector<Model*> houseStaticProps;
     std::unordered_map<int, Model*> houseDoorModels;
+    void updateLights(float time);
 
     // NUEVAS FUNCIONES PARA EL INPUT
     void ciclarTexturaInterior();
@@ -47,6 +48,7 @@ private:
     Shader* lightCubeShader; // NUEVO
     Camera* camera;
     Model* bedModel; // Guardamos el puntero para clonarlo después
+    PointLight* focoCocina1;
     unsigned int lightCubeVAO; // NUEVO
     unsigned int lightCubeVBO; // NUEVO
     void setupLightCube();     // NUEVO

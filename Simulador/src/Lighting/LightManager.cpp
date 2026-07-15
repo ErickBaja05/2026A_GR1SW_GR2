@@ -48,7 +48,7 @@ void LightManager::sendLightsToShader(Shader& shader) {
         shader.setFloat(base + "quadratic", pointLights[i]->quadratic);
     }
 
-    // 3. Linterna
+    // 3. Para la Linterna
     if (playerFlashLight && playerFlashLight->isOn) {
         shader.setVec3("flashLight.position", playerFlashLight->getGlobalPosition());
         shader.setVec3("flashLight.direction", playerFlashLight->direction);
