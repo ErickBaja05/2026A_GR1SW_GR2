@@ -7,14 +7,14 @@
 #include "../Interactable_Objects/Interactable.h" // ajusta el path a tu estructura real
 #include "../Interactable_Objects/Door.h"
 
-SceneManager::SceneManager(Shader* main, Shader* sky, LightManager* lm, Camera* cam) {
+
+SceneManager::SceneManager(Shader* main, LightManager* lm, Camera* cam) {
     mainShader = main;
-    skyboxShader = sky;
     lightManager = lm;
     camera = cam;
-    currentState = SceneState::NEIGHBORHOOD;
 
-    setupSkybox(); // Inicializamos el cubo gigante de fondo
+    // Al instanciar, cargamos directamente la casa
+    loadHouse();
 }
 
 SceneManager::~SceneManager() {
@@ -107,6 +107,9 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
     mainShader->setMat4("projection", projection);
     mainShader->setMat4("view", view);
 
+    // Posición de cámara para que funcionen los brillos del Phong (Specular)
+    mainShader->setVec3("viewPos", camera->Position);
+
     lightManager->sendLightsToShader(*mainShader);
 
     if (currentState == SceneState::NEIGHBORHOOD) {
@@ -138,6 +141,8 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
         glBindVertexArray(0);
         glDepthFunc(GL_LESS);
     }
+
+    glDisable(GL_BLEND);
 }
 
 void SceneManager::renderDoors(const std::vector<Interactable*>& interactables) {
@@ -250,66 +255,4 @@ void SceneManager::setupHouseLights() {
     lightManager->addPointLight(focoCV4P2);
 
 
-}
-
-// === CÓDIGO TÉCNICO DE GENERACIÓN DE SKYBOX ===
-void SceneManager::setupSkybox() {
-    float skyboxVertices[] = {
-        // Coordenadas de los 36 vértices de un cubo
-        -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f,
-        -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f,
-         1.0f, -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f, -1.0f, -1.0f,
-        -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f,  1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,
-        -1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,
-         1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f, -1.0f,
-        -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f
-    };
-
-    glGenVertexArrays(1, &skyboxVAO);
-    glGenBuffers(1, &skyboxVBO);
-    glBindVertexArray(skyboxVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
-    // Las fotos de Anderson
-    std::vector<std::string> faces = {
-        "Assets/skybox/right.jpg", "Assets/skybox/left.jpg",
-        "Assets/skybox/top.jpg", "Assets/skybox/bottom.jpg",
-        "Assets/skybox/front.jpg", "Assets/skybox/back.jpg"
-    };
-    cubemapTexture = loadCubemap(faces);
-}
-
-unsigned int SceneManager::loadCubemap(std::vector<std::string> faces) {
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-
-    int width, height, nrChannels;
-    for (unsigned int i = 0; i < faces.size(); i++) {
-        unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
-        if (data) {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-            stbi_image_free(data);
-        }
-        else {
-            std::cout << "Fallo al cargar imagen de Skybox: " << faces[i] << std::endl;
-            stbi_image_free(data);
-        }
-    }
-    // Parámetros obligatorios para Skybox
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    return textureID;
 }

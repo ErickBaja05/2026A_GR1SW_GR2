@@ -1,6 +1,9 @@
 #pragma once
-#include "../Scene/model.h"
+#include <vector>
+#include <string>
 #include "../Graphics/shader.h"
+#include "../Scene/model.h"
+#include "../Scene/camera.h"
 #include "../Lighting/LightManager.h"
 #include "../Scene/camera.h" // ¡Importante incluir la cámara!
 
@@ -19,19 +22,22 @@ enum class SceneState {
 };
 
 class SceneManager {
-private:
-    SceneState currentState;
-    LightManager* lightManager;
-    Camera* camera; // Guardamos la cámara para teletransportarla
+public:
+    // Ya no pedimos el shader del skybox
+    SceneManager(Shader* main, LightManager* lm, Camera* cam);
+    ~SceneManager();
 
     std::vector<Model*> neighborhoodProps;
     std::vector<Model*> houseStaticProps; // props sin transformación individual (paredes, muebles, etc.)
     std::unordered_map<int, Model*> houseDoorModels; // indexado por el mismo id de HouseInteractableIds.h
 
+private:
     Shader* mainShader;
-    Shader* skyboxShader;
+    LightManager* lightManager;
+    Camera* camera;
 
-    unsigned int skyboxVAO, skyboxVBO, cubemapTexture;
+    // Una sola lista para todo lo de la escena
+    std::vector<Model*> sceneProps;
 
     void setupHouseLights();
     unsigned int loadCubemap(std::vector<std::string> faces);

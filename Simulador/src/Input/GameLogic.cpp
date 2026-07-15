@@ -1,8 +1,6 @@
 #include "GameLogic.h"
-
 #include "CollisionManager.h"
 #include "InputManager.h"
-#include "../Engine/Window.h"
 #include "../Engine/SceneManager.h"
 #include "../Lighting/LightManager.h" 
 #include "../Scene/camera.h"
@@ -10,13 +8,11 @@
 #include "../Interactable_Objects/LightSwitch.h"
 #include <iostream>
 
-// Definición local de la tecla 'E' para evitar depender directamente del header de GLFW en el entorno global
 #ifndef GLFW_KEY_E
 #define GLFW_KEY_E 69
 #endif
 
-GameLogic::GameLogic(CollisionManager* collisionManager, InputManager* inputManager, SceneManager* sceneManager,
-    LightManager* lightManager, Camera* camera) {
+GameLogic::GameLogic(CollisionManager* collisionManager, InputManager* inputManager, SceneManager* sceneManager, LightManager* lightManager, Camera* camera) {
     this->collisionManager = collisionManager;
     this->inputManager = inputManager;
     this->sceneManager = sceneManager;
@@ -25,6 +21,8 @@ GameLogic::GameLogic(CollisionManager* collisionManager, InputManager* inputMana
     this->interactionKey = GLFW_KEY_E;
 }
 
+void GameLogic::update() {
+    if (!camera || !collisionManager || !inputManager) return;
 
 void GameLogic::update(double deltaTime)
 {
