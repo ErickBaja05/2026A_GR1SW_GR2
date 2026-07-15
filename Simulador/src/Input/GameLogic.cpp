@@ -19,6 +19,7 @@
 #define GLFW_KEY_7 55
 #endif
 
+
 GameLogic::GameLogic(CollisionManager* collisionManager, InputManager* inputManager, SceneManager* sceneManager, LightManager* lightManager, Camera* camera) {
     this->collisionManager = collisionManager;
     this->inputManager = inputManager;
