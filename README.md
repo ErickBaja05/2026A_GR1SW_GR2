@@ -1,4 +1,4 @@
-# open2yo
+# home2yo
 
 ## Misión
 Transformar la experiencia de compra y venta de bienes raíces a través de tecnología inmersiva, ofreciendo a las
