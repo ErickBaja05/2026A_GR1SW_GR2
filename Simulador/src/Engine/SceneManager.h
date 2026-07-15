@@ -26,7 +26,9 @@ class Interactable;
 
 class SceneManager {
 public:
-    SceneManager(Shader* main, LightManager* lm, Camera* cam);
+    // Modificar constructor para recibir el segundo shader
+    SceneManager(Shader* main, Shader* lightCube, LightManager* lm, Camera* cam);
+    // ...
     ~SceneManager();
 
     void loadHouse();
@@ -38,8 +40,12 @@ public:
 private:
     Shader* mainShader;
     LightManager* lightManager;
+    Shader* lightCubeShader; // NUEVO
     Camera* camera;
     Model* bedModel; // Guardamos el puntero para clonarlo después
+    unsigned int lightCubeVAO; // NUEVO
+    unsigned int lightCubeVBO; // NUEVO
+    void setupLightCube();     // NUEVO
     unsigned int floorVAO, floorVBO;
     unsigned int floorTexture;
     // Lista de offsets (desplazamientos) para el vecindario

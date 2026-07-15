@@ -5,17 +5,43 @@
 #include "../Interactable_Objects/Interactable.h" 
 #include "../Interactable_Objects/Door.h"
 
-SceneManager::SceneManager(Shader* main, LightManager* lm, Camera* cam) {
+// 1. Modificar el constructor
+SceneManager::SceneManager(Shader* main, Shader* lightCube, LightManager* lm, Camera* cam) {
     mainShader = main;
+    lightCubeShader = lightCube;
     lightManager = lm;
     camera = cam;
 
+    setupLightCube(); // Inicializa el cubo en memoria de GPU
     loadHouse();
 }
 
 SceneManager::~SceneManager() {
     for (Model* prop : houseStaticProps) delete prop;
     for (auto& pair : houseDoorModels) delete pair.second;
+}
+
+// 2. Añadir la función para cargar la geometría de un cubo (36 vértices simples)
+void SceneManager::setupLightCube() {
+    float vertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f,  0.5f, -0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
+        -0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f
+    };
+
+    glGenVertexArrays(1, &lightCubeVAO);
+    glGenBuffers(1, &lightCubeVBO);
+
+    glBindVertexArray(lightCubeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, lightCubeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Solo pasamos el layout 0 (aPos), coincidiendo con tu b2t4_vertex_lightcube.vs
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 }
 
 void SceneManager::loadHouse() {
@@ -256,6 +282,33 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
 
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
+    // ============================================================
+    // PASADA 3: RENDEREAR LOS FOCOS (Geometría visible)
+    // ============================================================
+    lightCubeShader->use();
+    lightCubeShader->setMat4("projection", projection);
+    lightCubeShader->setMat4("view", view);
+
+    glBindVertexArray(lightCubeVAO);
+
+    const auto& luces = lightManager->getPointLights();
+    for (PointLight* light : luces) {
+        // Solo dibujamos el foco si la luz está encendida
+        if (length(light->properties.diffuse) > 0.01) {
+            glm::mat4 model = glm::mat4(1.0f);
+
+            // 1. Movemos la geometría a la misma posición que programamos para la luz
+            model = glm::translate(model, light->getGlobalPosition());
+
+            // 2. Escalamos para que el foco mida 20 centímetros 
+            // (Si no escalas, tendrías cubos gigantes de 1 metro de lado)
+            model = glm::scale(model, glm::vec3(0.2f));
+
+            lightCubeShader->setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+    }
+
 }
 
 // Actualiza tu función renderDoors para recibir y aplicar el offset:
@@ -290,62 +343,77 @@ void SceneManager::setupHouseLights() {
     lightManager->addPointLight(focoBed);
 
     PointLight* focoCocina1 = new PointLight();
+    focoCocina1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCocina1->setPosition(glm::vec3(270.563f, 2.84878f, -5.3348f));
     lightManager->addPointLight(focoCocina1);
 
     PointLight* focoCocina2 = new PointLight();
+    focoCocina2->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCocina2->setPosition(glm::vec3(270.187f, 6.29f, -0.825975f));
     lightManager->addPointLight(focoCocina2);
 
     PointLight* focoCV1P1 = new PointLight();
+    focoCV1P1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV1P1->setPosition(glm::vec3(264.525f, 2.8753f, 1.73852f));
     lightManager->addPointLight(focoCV1P1);
 
     PointLight* focoCV2P1 = new PointLight();
+    focoCV2P1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV2P1->setPosition(glm::vec3(261.209f, 2.59878f, -3.69f));
     lightManager->addPointLight(focoCV2P1);
 
     PointLight* focoCV3P1 = new PointLight();
+    focoCV3P1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV3P1->setPosition(glm::vec3(263.78f, 2.81878f, -5.60954f));
     lightManager->addPointLight(focoCV3P1);
 
     PointLight* focoCV4P1 = new PointLight();
+    focoCV4P1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV4P1->setPosition(glm::vec3(266.462f, 2.86878f, -4.77572f));
     lightManager->addPointLight(focoCV4P1);
 
     PointLight* focoCV5P1 = new PointLight();
+    focoCV5P1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV5P1->setPosition(glm::vec3(266.482f, 2.86878f, -7.26744f));
     lightManager->addPointLight(focoCV5P1);
 
     PointLight* focoCV6P1 = new PointLight();
+    focoCV6P1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV6P1->setPosition(glm::vec3(261.15f, 2.59878f, -6.32682f));
     lightManager->addPointLight(focoCV6P1);
 
     PointLight* focoCV8P1 = new PointLight();
+    focoCV8P1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV8P1->setPosition(glm::vec3(254.419f, 2.7353f, -4.53488f));
     lightManager->addPointLight(focoCV8P1);
 
     PointLight* focoCV9P1 = new PointLight();
+    focoCV9P1->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV9P1->setPosition(glm::vec3(257.855f, 2.7353f, -4.60542f));
     lightManager->addPointLight(focoCV9P1);
 
     PointLight* focoGarage = new PointLight();
+    focoGarage->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoGarage->setPosition(glm::vec3(256.109f, 2.7353f, 0.15f));
     lightManager->addPointLight(focoGarage);
 
     PointLight* focoCV1P2 = new PointLight();
+    focoCV1P2->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV1P2->setPosition(glm::vec3(261.319f, 6.35819f, -1.89796f));
     lightManager->addPointLight(focoCV1P2);
 
     PointLight* focoCV2P2 = new PointLight();
+    focoCV2P2->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV2P2->setPosition(glm::vec3(270.03f, 6.35f, -6.18294f));
     lightManager->addPointLight(focoCV2P2);
 
     PointLight* focoCV3P3 = new PointLight();
+    focoCV3P3->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV3P3->setPosition(glm::vec3(266.578f, 6.35819f, -7.61872f));
     lightManager->addPointLight(focoCV3P3);
 
     PointLight* focoCV4P2 = new PointLight();
+    focoCV4P2->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV4P2->setPosition(glm::vec3(266.564f, 6.33819f, -4.96717f));
     lightManager->addPointLight(focoCV4P2);
 }
