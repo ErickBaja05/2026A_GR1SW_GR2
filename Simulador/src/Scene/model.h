@@ -55,15 +55,29 @@ public:
     string directory;
     bool gammaCorrection;
 
-    // Busca la malla por su nombre de Blender y le cambia el ID de la textura
+    // Busca la malla por su nombre (o parte de él) y le cambia el ID de la textura
     void swapTexture(std::string meshName, unsigned int newTextureID) {
+        bool encontrada = false;
+
         for (Mesh& mesh : meshes) {
-            if (mesh.name == meshName) {
+            // Usamos .find() para que funcione aunque Assimp la haya renombrado (ej. "Cube_Mat_Pared_001")
+            if (mesh.name.find(meshName) != std::string::npos) {
                 if (mesh.textures.size() > 0) {
-                    mesh.textures[0].id = newTextureID; // ¡Magia! Reemplazamos la textura
+                    mesh.textures[0].id = newTextureID; // ¡Aplicamos la nueva textura!
+                    encontrada = true;
                 }
-                return; // Encontramos la pared, salimos del bucle
             }
+        }
+
+        // RADAR DE DEPURACIÓN: Si Anderson nombró mal las cosas, la consola te avisará
+        if (!encontrada) {
+            std::cout << "=================================================\n";
+            std::cout << "[ERROR] No se encontro ninguna malla con el nombre: " << meshName << "\n";
+            std::cout << "Assimp detecto los siguientes nombres en el .obj:\n";
+            for (Mesh& m : meshes) {
+                std::cout << " -> " << m.name << "\n";
+            }
+            std::cout << "=================================================\n";
         }
     }
 };
