@@ -70,26 +70,39 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
     mainShader->setVec3("viewPos", camera->Position);
 
     lightManager->sendLightsToShader(*mainShader);
-
-    // Parches de la linterna y luz base
     mainShader->setVec3("flashLight.position", camera->Position);
     mainShader->setVec3("flashLight.direction", camera->Front);
-    mainShader->setVec3("dirLight.ambient", glm::vec3(0.4f, 0.4f, 0.4f));
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // Render estático
     glm::mat4 identityMatrix = glm::mat4(1.0f);
+
+    // ============================================================
+    // PASADA 1: RENDEREAR SOLO LO OPACO (Paredes, piso, muebles)
+    // ============================================================
+    mainShader->setBool("isTransparentPass", false);
+    glDisable(GL_BLEND); // Lo opaco no necesita mezcla
+    glDepthMask(GL_TRUE); // Escribimos en el Z-Buffer para tapar lo de atrás
+
     mainShader->setMat4("model", identityMatrix);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     for (Model* prop : houseStaticProps) prop->Draw(*mainShader);
-
-    // Render dinámico (Puertas animadas)
     renderDoors(interactables);
 
+    // ============================================================
+    // PASADA 2: RENDEREAR SOLO LO TRANSPARENTE (Vidrios)
+    // ============================================================
+    mainShader->setBool("isTransparentPass", true);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // ¡LA MAGIA OCURRE AQUÍ! Desactivamos la escritura en profundidad 
+    // para que los cristales no bloqueen el exterior.
+    glDepthMask(GL_FALSE);
+
+    mainShader->setMat4("model", identityMatrix);
+    for (Model* prop : houseStaticProps) prop->Draw(*mainShader);
+    renderDoors(interactables);
+
+    // Restaurar los estados por defecto
+    glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
 }
 
