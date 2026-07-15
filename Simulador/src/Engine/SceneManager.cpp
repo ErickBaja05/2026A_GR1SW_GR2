@@ -45,7 +45,83 @@ void SceneManager::setupLightCube() {
 }
 
 void SceneManager::loadHouse() {
-    std::cout << "[SceneManager] Cargando la casa..." << std::endl;
+    std::cout << "[SceneManager] Cargando la casa y el vecindario..." << std::endl;
+
+    //1. GENERAR EL VECINDARIO(4 Casas estratégicas para 60 FPS)
+        vecindarioOffsets.clear();
+
+    // Casa 1: La original (Donde spawnea el jugador)
+    vecindarioOffsets.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+
+    // Casa 2: Al frente (Avanzando en el eje X)
+    vecindarioOffsets.push_back(glm::vec3(-40.0f, 0.0f, 0.0f));
+
+    // Casa 3: A la izquierda (Moviéndonos en el eje Z)
+    vecindarioOffsets.push_back(glm::vec3(0.0f, 0.0f, -40.0f));
+
+    // Casa 4: Frente a la de la izquierda (Diagonal)
+    vecindarioOffsets.push_back(glm::vec3(-40.0f, 0.0f, -40.0f));
+
+    // 2. CONSTRUIR EL SÚPER-PISO EN C++
+    float fX0 = 0.2705f, fX1 = 0.4711f;
+    float fY0 = 0.6036f, fY1 = 0.7586f;
+
+    // Este es tu bloque base de 36 vértices (con el fix CCW de la cara superior)
+    float baseFloor[] = {
+        -0.5f, -0.5f, -0.5f,  fX0, fY0,   0.5f, -0.5f, -0.5f,  fX1, fY0,   0.5f,  0.5f, -0.5f,  fX1, fY1,
+         0.5f,  0.5f, -0.5f,  fX1, fY1,  -0.5f,  0.5f, -0.5f,  fX0, fY1,  -0.5f, -0.5f, -0.5f,  fX0, fY0,
+        -0.5f, -0.5f,  0.5f,  fX0, fY0,   0.5f, -0.5f,  0.5f,  fX1, fY0,   0.5f,  0.5f,  0.5f,  fX1, fY1,
+         0.5f,  0.5f,  0.5f,  fX1, fY1,  -0.5f,  0.5f,  0.5f,  fX0, fY1,  -0.5f, -0.5f,  0.5f,  fX0, fY0,
+        -0.5f,  0.5f,  0.5f,  fX0, fY1,  -0.5f,  0.5f, -0.5f,  fX1, fY1,  -0.5f, -0.5f, -0.5f,  fX1, fY0,
+        -0.5f, -0.5f, -0.5f,  fX1, fY0,  -0.5f, -0.5f,  0.5f,  fX0, fY0,  -0.5f,  0.5f,  0.5f,  fX0, fY1,
+         0.5f,  0.5f,  0.5f,  fX0, fY1,   0.5f,  0.5f, -0.5f,  fX1, fY1,   0.5f, -0.5f, -0.5f,  fX1, fY0,
+         0.5f, -0.5f, -0.5f,  fX1, fY0,   0.5f, -0.5f,  0.5f,  fX0, fY0,   0.5f,  0.5f,  0.5f,  fX0, fY1,
+        -0.5f, -0.5f, -0.5f,  fX0, fY0,   0.5f, -0.5f, -0.5f,  fX1, fY0,   0.5f, -0.5f,  0.5f,  fX1, fY1,
+         0.5f, -0.5f,  0.5f,  fX1, fY1,  -0.5f, -0.5f,  0.5f,  fX0, fY1,  -0.5f, -0.5f, -0.5f,  fX0, fY0,
+         // CARA SUPERIOR CCW
+         -0.5f,  0.5f,  0.5f,  fX0, fY1,   0.5f,  0.5f,  0.5f,  fX1, fY1,   0.5f,  0.5f, -0.5f,  fX1, fY0,
+          0.5f,  0.5f, -0.5f,  fX1, fY0,  -0.5f,  0.5f, -0.5f,  fX0, fY0,  -0.5f,  0.5f,  0.5f,  fX0, fY1
+    };
+
+    std::vector<float> giantFloor;
+
+    // Armamos el piso dinámicamente en RAM (25,600 bloques convertidos en 1 matriz gigante)
+    for (int x = -80; x <= 80; x++) {
+        for (int z = -80; z <= 80; z++) {
+            float offsetX = 260.0f + x;
+            float offsetZ = -5.0f + z;
+
+            for (int v = 0; v < 36; v++) {
+                giantFloor.push_back(baseFloor[v * 5 + 0] + offsetX); // X modificado
+                giantFloor.push_back(baseFloor[v * 5 + 1] - 1.0f);    // Y bajado a -1.0
+                giantFloor.push_back(baseFloor[v * 5 + 2] + offsetZ); // Z modificado
+                giantFloor.push_back(baseFloor[v * 5 + 3]);           // Textura U
+                giantFloor.push_back(baseFloor[v * 5 + 4]);           // Textura V
+            }
+        }
+    }
+
+    totalFloorVertices = giantFloor.size() / 5; // Guardamos cuántos vértices son para el render()
+
+    // 3. ENVIAR EL SÚPER-PISO A OPENGL (Se hace 1 sola vez)
+    glGenVertexArrays(1, &floorVAO);
+    glGenBuffers(1, &floorVBO);
+
+    glBindVertexArray(floorVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, floorVBO);
+    // Usamos giantFloor.data() y calculamos el peso en bytes
+    glBufferData(GL_ARRAY_BUFFER, giantFloor.size() * sizeof(float), giantFloor.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glBindVertexArray(0);
+
+    stbi_set_flip_vertically_on_load(true);
+    floorTexture = TextureFromFile("texture_floor.png", "Assets/textures", true);
+    stbi_set_flip_vertically_on_load(false);
 
     for (Model* prop : houseStaticProps) delete prop;
     houseStaticProps.clear();
@@ -53,20 +129,30 @@ void SceneManager::loadHouse() {
     for (auto& pair : houseDoorModels) delete pair.second;
     houseDoorModels.clear();
 
-    // Modelos estáticos
-    houseStaticProps.push_back(new Model("Assets/models/Casa/casa.obj"));
-    // 1. Cargamos el modelo y lo atrapamos en nuestra variable
-    bedModel = new Model("Assets/models/Bed/bed.obj");
-    houseStaticProps.push_back(bedModel);
-    houseStaticProps.push_back(new Model("Assets/models/Cupboard/cupboard.obj"));
-    houseStaticProps.push_back(new Model("Assets/models/Desk/desk.obj"));
-    houseStaticProps.push_back(new Model("Assets/models/Refrigerator/refrigerator.obj"));
-    houseStaticProps.push_back(new Model("Assets/models/Shower/shower.obj"));
-    houseStaticProps.push_back(new Model("Assets/models/Table/table.obj"));
-    houseStaticProps.push_back(new Model("Assets/models/Toiled/toiled.obj"));
-    houseStaticProps.push_back(new Model("Assets/models/Washbasin/washbasin.obj"));
+ 
 
-    // Puertas animadas
+    // ============================================================
+     // 1. ESTRUCTURAS FIJAS (Lo que siempre se dibuja 1 vez por casa)
+     // ============================================================
+    houseStaticProps.push_back(new Model("Assets/models/Casa/casa.obj"));
+
+    // ============================================================
+    // 2. CATÁLOGO DE MOLDES (Solo se guardan en memoria, el TXT los dibuja)
+    // ¡Adiós a originalPositions y a houseStaticProps para los muebles!
+    // ============================================================
+    modelCatalog["Bed"] = new Model("Assets/models/Bed/bed.obj");
+    modelCatalog["Cupboard"] = new Model("Assets/models/Cupboard/cupboard.obj");
+    modelCatalog["Car"] = new Model("Assets/models/Car/car.obj");
+    modelCatalog["Desk"] = new Model("Assets/models/Desk/desk.obj");
+    modelCatalog["Refrigerator"] = new Model("Assets/models/Refrigerator/refrigerator.obj");
+    modelCatalog["Shower"] = new Model("Assets/models/Shower/shower.obj");
+    modelCatalog["Table"] = new Model("Assets/models/Table/table.obj");
+    modelCatalog["Toiled"] = new Model("Assets/models/Toiled/toiled.obj");
+    modelCatalog["Washbasin"] = new Model("Assets/models/Washbasin/washbasin.obj");
+
+    // ============================================================
+    // 3. PUERTAS ANIMADAS
+    // ============================================================
     houseDoorModels[HouseInteractableIds::Door_CV1_P1] = new Model("Assets/models/P_CV1_p1/pcv1_p1.obj");
     houseDoorModels[HouseInteractableIds::Door_CV2_P1] = new Model("Assets/models/P_CV2_p1/pcv2_p1.obj");
     houseDoorModels[HouseInteractableIds::Door_CV3_P1] = new Model("Assets/models/P_CV3_p1/pcv3_p1.obj");
@@ -88,7 +174,11 @@ void SceneManager::loadHouse() {
     houseDoorModels[HouseInteractableIds::Door_Garage] = new Model("Assets/models/P_Garage/p_garage.obj");
     houseDoorModels[HouseInteractableIds::Door_Principal] = new Model("Assets/models/P_Principal/p_principal.obj");
 
+    // ============================================================
+    // 4. INICIALIZAR LUCES Y CARGAR DECORACIÓN FINAL
+    // ============================================================
     setupHouseLights();
+    loadLayoutData("Assets/layout_muebles.txt");
 }
 
 void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vector<Interactable*>& interactables) {
@@ -104,58 +194,92 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
     glm::mat4 identityMatrix = glm::mat4(1.0f);
 
     // ============================================================
-    // PASADA 1: RENDEREAR SOLO LO OPACO (Paredes, piso, muebles)
+    // LÓGICA DE DIBUJADO DE CLONES (ORIGINALES + CLONES)
     // ============================================================
+    auto DrawAllInstancedProps = [&](glm::vec3 houseOffset) {
+        for (const PropInstance& prop : sceneLayout) {
+            if (modelCatalog.find(prop.name) != modelCatalog.end()) {
+                glm::mat4 cloneMatrix = glm::mat4(1.0f);
+
+                // 5. Trasladar al vecindario
+                cloneMatrix = glm::translate(cloneMatrix, houseOffset);
+
+                // 4. Trasladar a la posición de Blender
+                cloneMatrix = glm::translate(cloneMatrix, prop.pos);
+
+                // 3. ROTACIÓN CORREGIDA: Agregamos el signo '-' por sugerencia de Anderson
+                cloneMatrix = glm::rotate(cloneMatrix, glm::radians(-prop.rotY), glm::vec3(0.0f, 1.0f, 0.0f));
+
+                // 2. Escalar
+                cloneMatrix = glm::scale(cloneMatrix, prop.scale);
+
+                // 1. DESHORNEAR (Matemática perfecta gracias a que el txt manda todo)
+                cloneMatrix = glm::translate(cloneMatrix, -prop.origPos);
+
+                mainShader->setMat4("model", cloneMatrix);
+                modelCatalog[prop.name]->Draw(*mainShader);
+            }
+        }
+        };
+
+    // ============================================================
+     // PASADA 1: RENDEREAR SOLO LO OPACO
+     // ============================================================
     mainShader->setBool("isTransparentPass", false);
-    glDisable(GL_BLEND); // Lo opaco no necesita mezcla
-    glDepthMask(GL_TRUE); // Escribimos en el Z-Buffer para tapar lo de atrás
+    glDisable(GL_BLEND);
+    glDepthMask(GL_TRUE);
 
-    mainShader->setMat4("model", identityMatrix);
-    for (Model* prop : houseStaticProps) prop->Draw(*mainShader);
-    // ============================================================
-    // CLONANDO LA CAMA HORNEADA
-    // ============================================================
-    glm::mat4 cloneMatrix = glm::mat4(1.0f);
+    // --- 1. DIBUJAR SÚPER PISO ---
+    glVertexAttrib3f(1, 0.0f, 1.0f, 0.0f);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, floorTexture);
+    mainShader->setInt("texture_diffuse1", 0);
 
-    // 1. El centro exacto de la cama original que calculó Anderson
-    glm::vec3 posOriginal = glm::vec3(261.39f, 3.9184f, 1.4983f);
+    glBindVertexArray(floorVAO);
+    mainShader->setMat4("model", glm::mat4(1.0f));
+    glDrawArrays(GL_TRIANGLES, 0, totalFloorVertices);
+    glBindVertexArray(0);
 
-    // 2. Coordenadas de tu CLON (La nueva ubicación en las gradas)
-    // NOTA: Como posOriginal era el centro de la cama, posNueva ahora también 
-    // representará dónde quieres que caiga el CENTRO de tu nueva cama.
-    glm::vec3 posNueva = glm::vec3(270.77f, 4.8823f, 2.5301f);
+    // --- 2. DIBUJAR VECINDARIO (ESTRUCTURAS FIJAS) ---
+    for (Model* prop : houseStaticProps) {
+        for (glm::vec3 offset : vecindarioOffsets) {
+            glm::mat4 houseMatrix = glm::translate(glm::mat4(1.0f), offset);
+            mainShader->setMat4("model", houseMatrix);
+            prop->Draw(*mainShader);
+        }
+    }
 
-    // PASO C: Movemos el clon a su nueva casa
-    cloneMatrix = glm::translate(cloneMatrix, posNueva);
-
-    // PASO B: Rotamos 180 grados sobre Y (gira sobre su propio centro)
-    cloneMatrix = glm::rotate(cloneMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-    // PASO A: Des-horneamos la cama mandando su centro a (0,0,0)
-    cloneMatrix = glm::translate(cloneMatrix, -posOriginal);
-
-    // Dibujamos
-    mainShader->setMat4("model", cloneMatrix);
-    if (bedModel) bedModel->Draw(*mainShader);
-
-    renderDoors(interactables);
+    // --- 3. DIBUJAR CLONES DE BLENDER Y PUERTAS ---
+    for (glm::vec3 offset : vecindarioOffsets) {
+        DrawAllInstancedProps(offset); // ¡Se llama 1 SOLA VEZ por cada casa!
+        renderDoors(interactables, offset);
+    }
 
     // ============================================================
-    // PASADA 2: RENDEREAR SOLO LO TRANSPARENTE (Vidrios)
+    // PASADA 2: RENDEREAR SOLO LO TRANSPARENTE
     // ============================================================
     mainShader->setBool("isTransparentPass", true);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // ¡LA MAGIA OCURRE AQUÍ! Desactivamos la escritura en profundidad 
-    // para que los cristales no bloqueen el exterior.
     glDepthMask(GL_FALSE);
 
-    mainShader->setMat4("model", identityMatrix);
-    for (Model* prop : houseStaticProps) prop->Draw(*mainShader);
-    renderDoors(interactables);
+    // Dibuja solo la estructura de las casas (que tienen ventanas de vidrio)
+    if (!houseStaticProps.empty()) {
+        Model* casaPrincipal = houseStaticProps[0];
+        for (glm::vec3 offset : vecindarioOffsets) {
+            glm::mat4 houseMatrix = glm::translate(glm::mat4(1.0f), offset);
+            mainShader->setMat4("model", houseMatrix);
+            casaPrincipal->Draw(*mainShader);
+        }
+    }
 
-    // Restaurar los estados por defecto
+    // Dibujamos las puertas transparentes
+    for (glm::vec3 offset : vecindarioOffsets) {
+        // Omitimos DrawAllInstancedProps aquí porque los inodoros y camas no tienen vidrios
+        // Eso ahorra muchísimo rendimiento.
+        renderDoors(interactables, offset);
+    }
+
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
     // ============================================================
@@ -187,11 +311,10 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
 
 }
 
-void SceneManager::renderDoors(const std::vector<Interactable*>& interactables) {
+// Actualiza tu función renderDoors para recibir y aplicar el offset:
+void SceneManager::renderDoors(const std::vector<Interactable*>& interactables, glm::vec3 houseOffset) {
     for (Interactable* obj : interactables) {
-        if (!obj || obj->getType() != InteractableType::Door) {
-            continue;
-        }
+        if (!obj || obj->getType() != InteractableType::Door) continue;
 
         auto it = houseDoorModels.find(obj->getId());
         if (it == houseDoorModels.end()) continue;
@@ -199,7 +322,8 @@ void SceneManager::renderDoors(const std::vector<Interactable*>& interactables) 
         Door* door = static_cast<Door*>(obj);
 
         glm::mat4 modelMatrix = glm::mat4(1.0f);
-        modelMatrix = glm::translate(modelMatrix, door->getPosition());
+        modelMatrix = glm::translate(modelMatrix, houseOffset); // 1. Mueve a la casa correcta
+        modelMatrix = glm::translate(modelMatrix, door->getPosition()); // 2. Mueve a la posición de la puerta
         modelMatrix = glm::rotate(modelMatrix, glm::radians(door->getRotationY()), glm::vec3(0.0f, 1.0f, 0.0f));
 
         mainShader->setMat4("model", modelMatrix);
@@ -292,4 +416,44 @@ void SceneManager::setupHouseLights() {
     focoCV4P2->properties.diffuse = glm::vec3(1.0f, 0.9f, 0.8f);
     focoCV4P2->setPosition(glm::vec3(266.564f, 6.33819f, -4.96717f));
     lightManager->addPointLight(focoCV4P2);
+}
+
+void SceneManager::loadLayoutData(const std::string& filepath) {
+    std::ifstream file(filepath);
+    if (!file.is_open()) {
+        std::cout << "ERROR: No se encontro el archivo " << filepath << std::endl;
+        return;
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string item;
+        PropInstance inst;
+
+        // 1. Nombre Base (Python ya lo manda limpio, ej. "Bed")
+        std::getline(ss, inst.name, ',');
+
+        // 2. Posición del Clon
+        std::getline(ss, item, ','); inst.pos.x = std::stof(item);
+        std::getline(ss, item, ','); inst.pos.y = std::stof(item);
+        std::getline(ss, item, ','); inst.pos.z = std::stof(item);
+
+        // 3. Rotación
+        std::getline(ss, item, ','); inst.rotY = std::stof(item);
+
+        // 4. Escala
+        std::getline(ss, item, ','); inst.scale.x = std::stof(item);
+        std::getline(ss, item, ','); inst.scale.y = std::stof(item);
+        std::getline(ss, item, ','); inst.scale.z = std::stof(item);
+
+        // 5. Pivote Original EXACTO (Extraído de Blender)
+        std::getline(ss, item, ','); inst.origPos.x = std::stof(item);
+        std::getline(ss, item, ','); inst.origPos.y = std::stof(item);
+        std::getline(ss, item, ','); inst.origPos.z = std::stof(item);
+
+        sceneLayout.push_back(inst);
+    }
+    file.close();
+    std::cout << "Se cargaron " << sceneLayout.size() << " clones desde el TXT con precisión absoluta." << std::endl;
 }
