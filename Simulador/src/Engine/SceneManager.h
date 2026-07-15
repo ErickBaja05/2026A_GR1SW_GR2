@@ -25,6 +25,7 @@ private:
     Shader* mainShader;
     LightManager* lightManager;
     Camera* camera;
+    Model* bedModel; // Guardamos el puntero para clonarlo después
 
     void setupHouseLights();
     void renderDoors(const std::vector<Interactable*>& interactables);
