@@ -56,9 +56,9 @@ void main() {
     
     // Si la textura falla o es negra por defecto, forzamos un gris claro 
     // para que la luz funcione y no se vea negra.
-    if (length(texColor.rgb) < 0.05) {
-        texColor.rgb = vec3(0.8);
-    }
+    //if (length(texColor.rgb) < 0.05) {
+       //texColor.rgb = vec3(0.8);
+    //}
 
     // 2. Normales seguras (Para evitar más errores matemáticos)
     vec3 norm = Normal;
