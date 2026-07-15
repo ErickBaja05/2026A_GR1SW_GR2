@@ -29,7 +29,9 @@ void SceneManager::loadHouse() {
 
     // Modelos estáticos
     houseStaticProps.push_back(new Model("Assets/models/Casa/casa.obj"));
-    houseStaticProps.push_back(new Model("Assets/models/Bed/bed.obj"));
+    // 1. Cargamos el modelo y lo atrapamos en nuestra variable
+    bedModel = new Model("Assets/models/Bed/bed.obj");
+    houseStaticProps.push_back(bedModel);
     houseStaticProps.push_back(new Model("Assets/models/Cupboard/cupboard.obj"));
     houseStaticProps.push_back(new Model("Assets/models/Desk/desk.obj"));
     houseStaticProps.push_back(new Model("Assets/models/Refrigerator/refrigerator.obj"));
@@ -84,6 +86,32 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
 
     mainShader->setMat4("model", identityMatrix);
     for (Model* prop : houseStaticProps) prop->Draw(*mainShader);
+    // ============================================================
+    // CLONANDO LA CAMA HORNEADA
+    // ============================================================
+    glm::mat4 cloneMatrix = glm::mat4(1.0f);
+
+    // 1. El centro exacto de la cama original que calculó Anderson
+    glm::vec3 posOriginal = glm::vec3(261.39f, 3.9184f, 1.4983f);
+
+    // 2. Coordenadas de tu CLON (La nueva ubicación en las gradas)
+    // NOTA: Como posOriginal era el centro de la cama, posNueva ahora también 
+    // representará dónde quieres que caiga el CENTRO de tu nueva cama.
+    glm::vec3 posNueva = glm::vec3(270.77f, 4.8823f, 2.5301f);
+
+    // PASO C: Movemos el clon a su nueva casa
+    cloneMatrix = glm::translate(cloneMatrix, posNueva);
+
+    // PASO B: Rotamos 180 grados sobre Y (gira sobre su propio centro)
+    cloneMatrix = glm::rotate(cloneMatrix, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+    // PASO A: Des-horneamos la cama mandando su centro a (0,0,0)
+    cloneMatrix = glm::translate(cloneMatrix, -posOriginal);
+
+    // Dibujamos
+    mainShader->setMat4("model", cloneMatrix);
+    if (bedModel) bedModel->Draw(*mainShader);
+
     renderDoors(interactables);
 
     // ============================================================
