@@ -45,12 +45,14 @@ public:
 
     /**
      * Comprueba si una posición específica está dentro del BoundingBox
-     * de algún trigger activo.
+     * de algún trigger activo, y de haber varios candidatos, elige el que
+     * mejor alineado esté con la dirección hacia la que mira el jugador.
      * * @param playerPosition Posición en el espacio 3D (usualmente la cámara).
-     * @return Trigger* Puntero al primer trigger activo encontrado en esa posición.
-     * Retorna nullptr si no hay colisión.
+     * @param playerForward Vector de dirección hacia el que mira el jugador (normalizado o no).
+     * @return Trigger* Puntero al trigger activo más relevante encontrado en esa posición.
+     * Retorna nullptr si no hay colisión con ningún trigger activo.
      */
-    Trigger* checkCollision(const glm::vec3& playerPosition);
+    Trigger* checkCollision(const glm::vec3& playerPosition, const glm::vec3& playerForward);
 
 private:
     std::vector<Trigger> m_triggers;
@@ -63,4 +65,11 @@ private:
      * @return true si el punto está dentro, false en caso contrario.
      */
     bool isPointInsideBox(const glm::vec3& point, const BoundingBox& box) const;
+
+    /**
+     * Calcula qué tan alineado está el trigger con la dirección hacia la que
+     * mira el jugador (producto punto normalizado, rango [-1, 1]).
+     * Un valor más alto significa que el jugador está mirando más directamente hacia el trigger.
+     */
+    float getFacingScore(const glm::vec3& playerPosition, const glm::vec3& playerForward, const Trigger& trigger) const;
 };

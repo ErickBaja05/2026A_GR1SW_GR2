@@ -30,6 +30,8 @@ void InputManager::processInput(GLFWwindow* window, double deltaTime)
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera->ProcessKeyboard(RIGHT, deltaTime);
+    //If I want to stay in ground level (xz plane)
+    //camera->Position.y = 3.0f;
 }
 
 bool InputManager::isKeyPressed(int key) const
@@ -57,4 +59,17 @@ void InputManager::mouse_callback(GLFWwindow* window, double xpos, double ypos)
 void InputManager::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera->ProcessMouseScroll(yoffset);
+}
+
+bool InputManager::isKeyJustPressed(int key)
+{
+    if (!window) return false;
+
+    bool currentlyPressed = glfwGetKey(window, key) == GLFW_PRESS;
+    bool wasPressed = previousKeyState[key]; // si la tecla nunca se consultó, unordered_map la crea como false
+
+    previousKeyState[key] = currentlyPressed;
+
+    // Solo es "true" en el frame exacto de la transición false -> true
+    return currentlyPressed && !wasPressed;
 }

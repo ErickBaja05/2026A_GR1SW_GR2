@@ -1,104 +1,41 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
+    <ClCompile Include="src\Engine\glad.c" />
+    <ClCompile Include="src\Engine\SceneManager.cpp" />
+    <ClCompile Include="src\Engine\Window.cpp" />
+    <ClCompile Include="src\Input\CollisionManager.cpp" />
+    <ClCompile Include="src\Input\GameLogic.cpp" />
+    <ClCompile Include="src\Input\InputManager.cpp" />
+    <ClCompile Include="src\Interactable_Objects\Door.cpp" />
+    <ClCompile Include="src\Interactable_Objects\FloatAnimator.cpp" />
+    <ClCompile Include="src\Interactable_Objects\Interactable.cpp" />
+    <ClCompile Include="src\Interactable_Objects\InteractableManager.cpp" />
+    <ClCompile Include="src\Interactable_Objects\LightSwitch.cpp" />
+    <ClCompile Include="src\Lighting\LightManager.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Scene\model.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Engine\glad.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Engine\Window.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Engine\SceneManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Lighting\LightManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Input\GameLogic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Input\InputManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Input\CollisionManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Scene\model.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <ClInclude Include="Dependencies\include\stb_image.h" />
+    <ClInclude Include="src\Engine\SceneManager.h" />
+    <ClInclude Include="src\Engine\Window.h" />
+    <ClInclude Include="src\Graphics\mesh.h" />
+    <ClInclude Include="src\Graphics\shader.h" />
+    <ClInclude Include="src\Input\CollisionManager.h" />
+    <ClInclude Include="src\Input\GameLogic.h" />
+    <ClInclude Include="src\Input\InputManager.h" />
+    <ClInclude Include="src\Interactable_Objects\Door.h" />
+    <ClInclude Include="src\Interactable_Objects\FloatAnimator.h" />
+    <ClInclude Include="src\Interactable_Objects\HouseInteractableIds.h" />
+    <ClInclude Include="src\Interactable_Objects\Interactable.h" />
+    <ClInclude Include="src\Interactable_Objects\InteractableManager.h" />
+    <ClInclude Include="src\Interactable_Objects\LightSwitch.h" />
+    <ClInclude Include="src\Lighting\LightManager.h" />
+    <ClInclude Include="src\Scene\camera.h" />
+    <ClInclude Include="src\Scene\model.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Graphics\mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Graphics\shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\model.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Engine\Window.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Engine\SceneManager.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Engine\SceneNode.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Input\CollisionManager.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Input\GameLogic.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Input\InputManager.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Lighting\LightManager.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Dependencies\include\stb_image.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\shaders\triangle.vs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="Assets\shaders\triangle.fs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="Assets\shaders\model.vs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="Assets\shaders\model.fs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="Assets\shaders\skybox.vs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="Assets\shaders\skybox.fs">
-      <Filter>Source Files</Filter>
-    </None>
+    <None Include="Assets\shaders\model.fs" />
   </ItemGroup>
 </Project>

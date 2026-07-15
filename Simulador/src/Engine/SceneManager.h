@@ -1,45 +1,41 @@
 #pragma once
-#include "../Scene/model.h"
-#include "../Graphics/shader.h"
-#include "../Lighting/LightManager.h"
-#include "../Scene/camera.h" // ¡Importante incluir la cámara!
-
-#include <glm/glm.hpp>
-#include <string>
 #include <vector>
+#include <string>
+#include <unordered_map>
+#include <cstdlib> // Para generar números aleatorios (rand)
+#include <ctime>   // Para la semilla (time)
+#include "../Graphics/shader.h"
+#include "../Scene/model.h" // ¡Corregido el path para evitar el error E1696!
+#include "../Scene/camera.h"
+#include "../Lighting/LightManager.h"
+#include <stb_image.h>
 
-enum class SceneState {
-    NEIGHBORHOOD,
-    INSIDE_HOUSE
-};
+// Forward declaration
+class Interactable;
 
 class SceneManager {
-private:
-    SceneState currentState;
-    LightManager* lightManager;
-    Camera* camera; // Guardamos la cámara para teletransportarla
-
-    std::vector<Model*> neighborhoodProps;
-    std::vector<Model*> houseProps;
-
-    Shader* mainShader;
-    Shader* skyboxShader;
-
-    unsigned int skyboxVAO, skyboxVBO, cubemapTexture;
-
-    void setupHouseLights();
-    unsigned int loadCubemap(std::vector<std::string> faces);
-    void setupSkybox();
-
 public:
-    // Ahora recibe la cámara
-    SceneManager(Shader* main, Shader* sky, LightManager* lm, Camera* cam);
+    SceneManager(Shader* main, LightManager* lm, Camera* cam);
     ~SceneManager();
 
-    void loadNeighborhood();
     void loadHouse();
-    void toggleScene(); // Función que usará Josue
+    void render(glm::mat4 view, glm::mat4 projection, const std::vector<Interactable*>& interactables);
 
-    void render(glm::mat4 view, glm::mat4 projection);
-    SceneState getCurrentState() { return currentState; }
+    std::vector<Model*> houseStaticProps;
+    std::unordered_map<int, Model*> houseDoorModels;
+
+private:
+    Shader* mainShader;
+    LightManager* lightManager;
+    Camera* camera;
+    Model* bedModel; // Guardamos el puntero para clonarlo después
+    unsigned int floorVAO, floorVBO;
+    unsigned int floorTexture;
+    // Lista de offsets (desplazamientos) para el vecindario
+    std::vector<glm::vec3> vecindarioOffsets;
+    // Guardaremos la cantidad total de vértices del súper-piso
+    int totalFloorVertices;
+
+    void setupHouseLights();
+    void renderDoors(const std::vector<Interactable*>& interactables, glm::vec3 houseOffset);
 };
