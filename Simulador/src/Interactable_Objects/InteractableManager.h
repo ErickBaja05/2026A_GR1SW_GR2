@@ -44,7 +44,8 @@ private:
      */
     static void createDoorWithTrigger(int id, const glm::vec3& hingePosition,
         std::vector<std::unique_ptr<Interactable>>& outInteractables,
-        CollisionManager& collisionManager);
+        CollisionManager& collisionManager,
+        const glm::vec3& rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f));
 
     /**
      * Crea un LightSwitch en position, lo agrega a outInteractables, y registra
