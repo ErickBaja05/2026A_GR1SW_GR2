@@ -16,7 +16,7 @@ float lastFrame = 0.0f;
 
 int main() {
     // 1. Inicializamos la Ventana y OpenGL
-    Window gameWindow(1024, 768, "Home2You - Proyecto Computación Gráfica");
+    Window gameWindow(1024, 768, "Home2You - Proyecto Computación Gráfica", true);
 
     // Configuraciones globales de OpenGL
     glEnable(GL_DEPTH_TEST);

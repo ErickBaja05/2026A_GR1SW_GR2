@@ -1,12 +1,20 @@
 #include "Window.h"
 
-Window::Window(int w, int h, const char* title) : width(w), height(h) {
+Window::Window(int w, int h, const char* title, bool fullscreen) : width(w), height(h) {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(width, height, title, NULL, NULL);
+    GLFWmonitor* monitor = NULL;
+    if (fullscreen) {
+        monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+        width = mode->width;
+        height = mode->height;
+    }
+
+    window = glfwCreateWindow(width, height, title, monitor, NULL);
     if (window == NULL) {
         std::cout << "Fallo al crear la ventana GLFW" << std::endl;
         glfwTerminate();
