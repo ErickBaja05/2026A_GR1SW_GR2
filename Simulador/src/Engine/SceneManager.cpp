@@ -379,7 +379,7 @@ void SceneManager::renderDoors(const std::vector<Interactable*>& interactables, 
         glm::mat4 modelMatrix = glm::mat4(1.0f);
         modelMatrix = glm::translate(modelMatrix, houseOffset); // 1. Mueve a la casa correcta
         modelMatrix = glm::translate(modelMatrix, door->getPosition()); // 2. Mueve a la posición de la puerta
-        modelMatrix = glm::rotate(modelMatrix, glm::radians(door->getRotationY()), glm::vec3(0.0f, 1.0f, 0.0f));
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(door->getRotationY()), door->getRotationAxis());
 
         mainShader->setMat4("model", modelMatrix);
         it->second->Draw(*mainShader);

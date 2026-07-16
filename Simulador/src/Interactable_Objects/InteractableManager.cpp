@@ -31,8 +31,8 @@ std::vector<std::unique_ptr<Interactable>> InteractableManager::createHouseInter
     createDoorWithTrigger(HouseInteractableIds::Door_Bathroom,  glm::vec3(264.263f, 5.672f, -3.73293f),  interactables, collisionManager);
     createDoorWithTrigger(HouseInteractableIds::Door_Bedroom,   glm::vec3(264.093f, 5.672f, -0.110922f), interactables, collisionManager);
     createDoorWithTrigger(HouseInteractableIds::Door_Cocina,    glm::vec3(273.681f, 2.562f, -3.98411f),  interactables, collisionManager);
-    createDoorWithTrigger(HouseInteractableIds::Door_Garage,    glm::vec3(258.966f, 2.487f, 3.99366f),   interactables, collisionManager);
-    createDoorWithTrigger(HouseInteractableIds::Door_Principal, glm::vec3(261.978f, 2.2f,   2.86866f),   interactables, collisionManager);
+    createDoorWithTrigger(HouseInteractableIds::Door_Garage,    glm::vec3(258.966f, 2.487f, 3.99366f),   interactables, collisionManager, glm::vec3(-1.0f, 0.0f, 0.0f));
+    createDoorWithTrigger(HouseInteractableIds::Door_Principal, glm::vec3(261.978f, 2.2f,   2.86866f),   interactables, collisionManager, glm::vec3(0.0f, -1.0f, 0.0f));
 
     // ===================== NUEVO: FOCOS DE LUZ =====================
     createLightCubeWithTrigger(HouseInteractableIds::Light_Bath, glm::vec3(262.692f, 6.29839f, -5.6183f), interactables, collisionManager);
@@ -58,9 +58,10 @@ std::vector<std::unique_ptr<Interactable>> InteractableManager::createHouseInter
 
 void InteractableManager::createDoorWithTrigger(int id, const glm::vec3& hingePosition,
     std::vector<std::unique_ptr<Interactable>>& outInteractables,
-    CollisionManager& collisionManager)
+    CollisionManager& collisionManager,
+    const glm::vec3& rotationAxis)
 {
-    outInteractables.push_back(std::make_unique<Door>(id, hingePosition));
+    outInteractables.push_back(std::make_unique<Door>(id, hingePosition, 0.0f, 90.0f, rotationAxis));
     float triggerHalfExtentXZ = 1.5f;
     float triggerHeightMin = -2.5f;
     float triggerHeightMax = 1.0f;
