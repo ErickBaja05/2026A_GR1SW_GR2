@@ -46,5 +46,5 @@ Gracias al sistema de manejo de luces, los shaders aplican la atenuación corres
 ## Compilación y Ejecución
 1. Clonar el repositorio.
 2. Abrir el archivo Simulador.slnx en Visual Studio
-3. Compilar la ejecución
+3. Compilar la solución y ejecutar el archivo main.cpp
 
