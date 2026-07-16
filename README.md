@@ -1,11 +1,5 @@
 # home2yo
 
-## Misión
-Transformar la experiencia de compra y venta de bienes raíces a través de tecnología inmersiva, ofreciendo a las inmobiliarias y a sus clientes recorridos virtuales interactivos y ultrarrealistas.
-
-
-## Visión
-Que nuestro software se convierta en el estándar para la compra y venta de propiedades inmuebles dentro del país en los próximos 10 años. 
 
 # Motor Gráfico 3D en C++ (OpenGL & GLM)
 Un motor de renderizado 3D interactivo desarrollado en C++ utilizando OpenGL y la librería de matemáticas GLM. 
