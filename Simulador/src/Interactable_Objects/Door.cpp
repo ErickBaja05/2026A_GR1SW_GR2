@@ -1,10 +1,11 @@
 #include "Door.h"
 
-Door::Door(int id, const glm::vec3& position, float closeAngleDeg, float openAngleDeg)
+Door::Door(int id, const glm::vec3& position, float closeAngleDeg, float openAngleDeg, const glm::vec3& rotationAxis)
     : Interactable(id, InteractableType::Door, position)
     , state(DoorState::Closed)
     , closeAngle(closeAngleDeg)
     , openAngle(openAngleDeg)
+    , rotationAxis(rotationAxis)
     , angleAnimator()
 {
     // El animator debe iniciar exactamente en closeAngle, sin animación pendiente
@@ -58,6 +59,11 @@ DoorState Door::getState() const
 float Door::getRotationY() const
 {
     return angleAnimator.getCurrent();
+}
+
+const glm::vec3& Door::getRotationAxis() const
+{
+    return rotationAxis;
 }
 
 void Door::open()

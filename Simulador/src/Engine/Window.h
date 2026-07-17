@@ -9,7 +9,7 @@ private:
     int width, height;
 
 public:
-    Window(int w, int h, const char* title);
+    Window(int w, int h, const char* title, bool fullscreen = false);
     ~Window();
 
     bool shouldClose();

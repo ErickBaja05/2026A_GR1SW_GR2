@@ -175,6 +175,7 @@ void SceneManager::loadHouse() {
     houseStaticProps.push_back(new Model("Assets/models/Car/car.obj"));
     houseStaticProps.push_back(new Model("Assets/models/Refrigerator/refrigerator.obj"));
     houseStaticProps.push_back(new Model("Assets/models/Table/table.obj"));
+    houseStaticProps.push_back(new Model("Assets/models/Kitchen/kitchen.obj"));
 
     // ============================================================
     // 2. CATÁLOGO DE CLONES (Manejados exclusivamente por el TXT)
@@ -257,8 +258,8 @@ void SceneManager::render(glm::mat4 view, glm::mat4 projection, const std::vecto
                 // 4. Trasladar a la posición de Blender
                 cloneMatrix = glm::translate(cloneMatrix, prop.pos);
 
-                // 3. Rotar (Con el signo '-' por sugerencia de Anderson)
-                cloneMatrix = glm::rotate(cloneMatrix, glm::radians(-prop.rotY), glm::vec3(0.0f, 1.0f, 0.0f));
+                // 3. Rotar (yaw de Blender mapeado directo a Y de OpenGL, sin invertir signo)
+                cloneMatrix = glm::rotate(cloneMatrix, glm::radians(prop.rotY), glm::vec3(0.0f, 1.0f, 0.0f));
 
                 // 2. Escalar
                 cloneMatrix = glm::scale(cloneMatrix, prop.scale);
@@ -378,7 +379,7 @@ void SceneManager::renderDoors(const std::vector<Interactable*>& interactables, 
         glm::mat4 modelMatrix = glm::mat4(1.0f);
         modelMatrix = glm::translate(modelMatrix, houseOffset); // 1. Mueve a la casa correcta
         modelMatrix = glm::translate(modelMatrix, door->getPosition()); // 2. Mueve a la posición de la puerta
-        modelMatrix = glm::rotate(modelMatrix, glm::radians(door->getRotationY()), glm::vec3(0.0f, 1.0f, 0.0f));
+        modelMatrix = glm::rotate(modelMatrix, glm::radians(door->getRotationY()), door->getRotationAxis());
 
         mainShader->setMat4("model", modelMatrix);
         it->second->Draw(*mainShader);

@@ -16,7 +16,7 @@ float lastFrame = 0.0f;
 
 int main() {
     // 1. Inicializamos la Ventana y OpenGL
-    Window gameWindow(1024, 768, "Escape Nocturno - Proyecto Computación Gráfica");
+    Window gameWindow(1024, 768, "Home2You - Proyecto Computación Gráfica", true);
 
     // Configuraciones globales de OpenGL
     glEnable(GL_DEPTH_TEST);
@@ -144,10 +144,10 @@ int main() {
         // ==========================================================
         // El color del cielo se rige exclusivamente por el dayFactor (el Sol).
         // Cuando el Sol baja, el fondo se queda en el azul oscuro de la noche.
-        float red = (0.7f * dayFactor) + 0.02f;
-        float green = (0.5f * dayFactor) + 0.02f;
-        float blue = (0.3f * dayFactor) + 0.08f;
-
+        float red = (0.4f * dayFactor) + 0.02f;
+        float green = (0.6f * dayFactor) + 0.02f;
+        float blue = (0.9f * dayFactor) + 0.08f;
+        //0.4 0.6 0,9
         glClearColor(red, green, blue, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // FASE 3
