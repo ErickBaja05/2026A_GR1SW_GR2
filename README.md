@@ -27,7 +27,9 @@ geometrías de distintos niveles de complejidad (como paredes, pisos, sillas y o
     ├── 📁 Engine/                
     ├── 📁 Graphics/              
     ├── 📁 Scene/                 
-    ├── 📁 Lighting/              
+    ├── 📁 Lighting/
+    ├── 📁 Input/
+    ├── 📁 Interactable_Objects/               
     └── 📄 main.cpp
 
 ```
