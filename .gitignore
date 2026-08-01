@@ -1,88 +1,118 @@
-# Prerequisites
-*.d
+# ===========================
+# Build
+# ===========================
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.so.*
-
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-
-# Executables
-*.exe
-*.out
-*.app
-
-# Build directories
 build/
 Build/
 build-*/
 
-# CMake generated files
+# ===========================
+# CMake
+# ===========================
+
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
+compile_commands.json
 Makefile
 install_manifest.txt
-compile_commands.json
 
-# Temporary files
+# ===========================
+# Visual Studio
+# ===========================
+
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+CMakeSettings.json
+CMakeUserPresets.json
+
+x64/
+x86/
+Debug/
+Release/
+
+# ===========================
+# VS Code
+# ===========================
+
+.vscode/
+
+# ===========================
+# CLion
+# ===========================
+
+.idea/
+
+# ===========================
+# Ninja
+# ===========================
+
+.ninja_deps
+.ninja_log
+
+# ===========================
+# Object files
+# ===========================
+
+*.o
+# Ignorar object files de compilación
+   build/**/*.obj
+
+   # Mantener modelos 3D
+   !assets/**/*.obj
+*.lo
+*.slo
+
+# ===========================
+# Static Libraries
+# ===========================
+
+*.a
+*.la
+*.lai
+
+# ===========================
+# Dynamic Libraries
+# ===========================
+
+*.so
+*.so.*
+*.dylib
+*.dll
+
+# ===========================
+# Executables
+# ===========================
+
+*.exe
+*.out
+*.app
+
+# ===========================
+# Debug
+# ===========================
+
+*.pdb
+*.ilk
+*.idb
+*.dwo
+
+# ===========================
+# Misc
+# ===========================
+
 *.tmp
 *.log
 *.bak
 *.swp
-
-# vcpkg
+.cache/
+Testing/
 vcpkg_installed/
 
-# debug information files
-*.dwo
+# ===========================
+# macOS
+# ===========================
 
-# test output & cache
-Testing/
-.cache/
-
-# Carpetas de Visual Studio
-**/.vs/
-**/*.user
-**/*.userosscache
-**/*.sln.docstates
-
-# Carpetas de compilación (¡ESTO NUNCA SE SUBE!)
-**/x64/
-**/x86/
-**/Debug/
-**/Release/
-**/[Bb]in/
-**/[Oo]bj/
-
-# Archivos compilados
-*.exe
-*.pdb
-*.ilk
-*.idb
-
+.DS_Store
