@@ -151,16 +151,23 @@ int main() {
         glClearColor(red, green, blue, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // FASE 3
-        // 1. Preguntamos el tamaño real y actual de la ventana en píxeles
         int width, height;
         glfwGetFramebufferSize(rawWindow, &width, &height);
 
-        // 2. Le ordenamos a OpenGL que su lienzo de dibujo ocupe el 100% de ese tamaño
+        // Evitar división por cero
+        if (height == 0) height = 1;
+
         glViewport(0, 0, width, height);
 
-        // 3. Calculamos la proyección dividiendo el ancho real para el alto real
-        // Esto evita que la casa se vea estirada o aplastada si cambias el tamaño de la ventana
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 5000.0f);
+        float aspect = std::max((float)width / (float)height, 0.0001f);
+
+        glm::mat4 projection = glm::perspective(
+            glm::radians(camera.Zoom),
+            aspect,
+            0.1f,
+            5000.0f
+        );
+
         glm::mat4 view = camera.GetViewMatrix();
 
         
