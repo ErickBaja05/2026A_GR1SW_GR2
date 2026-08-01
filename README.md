@@ -8,10 +8,10 @@ entorno mediante una arquitectura jerárquica robusta.
 
 # Desarolladores
 
-Erick Bajaña -----> Gestión de escenas, arquitectura del Sistema,  texturas dinámicas y migración a CMake para que sea SO independiente
-Anderson Pilataxi ----> Artista 3D a cargo de mejorar los modelos y separalos para lograr funcionalides específicas utilizando Blender
-Josue Carcelén -----> Desarollador de la lógica de objetos dinámicos como la apertura de puertas, la detección de luces para ON/OFF Y demás.
-Jorge Revelo ------> Desarollador de shaders para iluminación para implementar el modelo de iluminación de Phong en alta calidad.
+- Erick Bajaña -----> Gestión de escenas, arquitectura del Sistema,  texturas dinámicas y migración a CMake para que sea SO independiente
+- Anderson Pilataxi ----> Artista 3D a cargo de mejorar los modelos y separalos para lograr funcionalides específicas utilizando Blender
+- Josue Carcelén -----> Desarollador de la lógica de objetos dinámicos como la apertura de puertas, la detección de luces para ON/OFF Y demás.
+- Jorge Revelo ------> Desarollador de shaders para iluminación para implementar el modelo de iluminación de Phong en alta calidad.
 
 ## Características Principales
 ### Importación de Modelos
