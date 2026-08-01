@@ -109,23 +109,16 @@ cmake --build build
 
 ```
 
-Desde la raíz del proyecto (GPU DEDICADA EN LAPTOP O LA CONECTADA AL MONITOR EN PC ESCRITORIO)
+Desde la raíz del proyecto (GPU DEDICADA EN LAPTOP NVIDIA O LA CONECTADA AL MONITOR EN PC ESCRITORIO)
 
 ```bash
 cmake -B build -S .
 cmake --build build
-prime-run ./build/ProyectoSimulador
+__NV_PRIME_RENDER_OFFLOAD=1 \
+__GLX_VENDOR_LIBRARY_NAME=nvidia \
+./build/ProyectoSimulador
 
 ```
-
-o
-```bash
-cmake -B build -S .
-cmake --build build
-DRI_PRIME=1 ./build/ProyectoSimulador
-
-```
-
 
 **Windows:**
 
@@ -136,5 +129,7 @@ cmake --build build --config Debug
 cd build\Debug
 .\ProyectoSimulador.exe
 
-
 ```
+
+Asegurarse de que el Sistema Operativo este ejecutando el .exe con la gráfica dedicada (si tiene una) desde las configuraciones de Windows en 
+Configuración -> Pantalla -> Gráficos. Añada el ProyectoSimulador.exe y escoja la grafica de su preferencia para la ejecución del Simulador
