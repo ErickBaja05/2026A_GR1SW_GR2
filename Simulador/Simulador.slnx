@@ -1,7 +1,0 @@
-<Solution>
-  <Configurations>
-    <Platform Name="x64" />
-    <Platform Name="x86" />
-  </Configurations>
-  <Project Path="Simulador.vcxproj" Id="d563287a-e70d-48ee-838a-ca7dd9aefece" />
-</Solution>
