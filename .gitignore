@@ -57,7 +57,11 @@ Release/
 # ===========================
 
 *.o
-*.obj
+# Ignorar object files de compilación
+   build/**/*.obj
+
+   # Mantener modelos 3D
+   !assets/**/*.obj
 *.lo
 *.slo
 
