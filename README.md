@@ -6,7 +6,7 @@ Un motor de renderizado 3D interactivo desarrollado en C++ utilizando OpenGL y l
 La aplicación está estructurada para manejar de manera eficiente el renderizado y las interacciones del
 entorno mediante una arquitectura jerárquica robusta.
 
-# Desarolladores
+# Desarrolladores
 
 - Erick Bajaña -----> Gestión de escenas, arquitectura del Sistema,  texturas dinámicas y migración a CMake para que sea SO independiente
 - Anderson Pilataxi ----> Artista 3D a cargo de mejorar los modelos y separalos para lograr funcionalides específicas utilizando Blender
