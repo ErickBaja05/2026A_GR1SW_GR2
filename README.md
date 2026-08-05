@@ -64,7 +64,7 @@ Este proyecto requiere:
 El primer paso es clonar el repositorio:
 
 ```bash
-git clone https://github.com/ErickBaja05/2026A_GR1SW_GR2
+git clone https://github.com/ErickBaja05/ProyectoOpenGlHome2yo
 ```
 
 ### Instalación de dependencias
